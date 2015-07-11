@@ -1,0 +1,186 @@
+doctype html
+html(lang="en")
+ head
+  meta(http-equiv="content-type", content="text/html; charset=utf-8")
+  title Cryptocurrency visualization
+  link(rel="icon",href="/favicon.ico")
+  link(href="stylesheets/bootstrap.min.css", rel="stylesheet")
+  link(rel="stylesheet", href="stylesheets/main.css")
+  script(type="text/javascript", src="/javascripts/d3.js")
+  
+  script(src="javascripts/jquery-1.11.2.min.js")
+  script(src="javascripts/bootstrap.min.js")
+  script(type="text/javascript", src="/javascripts/stopwatch.js")
+  script(type="text/javascript", src="/javascripts/d3visual.js") 
+  script(type="text/javascript", src="/javascripts/d3visual_lite.js")
+  script(type='text/javascript', src='/primus/primus.js')
+
+ script.
+   $(document).ready(function(){
+   $('[data-toggle="popover"]').popover({ trigger: "hover"
+   });
+   });
+ script.
+   $(document).ready(function(){
+   $('#lite').click(function(){
+   $('#area2').empty();
+   $.getScript('/javascripts/d3visual_lite.js')
+     closesocket(coin);
+     triggerTime (coin);
+     console.log('socket '+coin+' closed');
+     
+   });
+   });
+ script.
+   $(document).ready(function(){
+   $('#bit').click(function(){
+   $('#area2').empty();
+   $.getScript('/javascripts/d3visual.js')
+     closesocket(coin);
+     triggerTime (coin);
+     console.log('socket '+coin+' closed');
+   });
+   });  
+ script.
+   $(document).ready(function(){
+   $('#doge').click(function(){
+   $('#area2').empty();
+   $.getScript('/javascripts/d3visual_doge.js')
+     closesocket(coin);
+     triggerTime (coin);
+     console.log('socket '+coin+' closed');
+      
+   });
+   });  
+ body
+  #header.navbar.navbar-default.navbar-fixed-top
+   .navbar-header
+    button.navbar-toggle.collapsed(type="button", data-toggle="collapse", data-target=".navbar-collapse")
+     i.icon-reorder
+    a.navbar-brand
+     | cc.Blocks
+   nav.collapse.navbar-collapse
+    ul.nav.navbar-nav
+     li
+      a#bit.crypto(href='#')
+       | Bitcoin
+       img(src="images/Bitcoin.png", style="width:30px;height:30px")
+     li
+      a#lite.crypto(href='#')
+       | Litecoin
+       img(src="images/Litecoin.png", style="width:30px;height:30px")
+     li
+      a#doge.crypto(href="#")
+       | Dogecoin
+       img(src="images/dogecoin.png", style="width:30px;height:30px")
+    ul.nav.navbar-nav.pull-right
+     li
+      a.crypto(href="#")
+       | Contact
+  .container-fluid
+   .row
+    #left-table.col-sm-2.col-md-2.col-lg-2.hidden-xs.hidden-phone.panel-primary.table-responsive 
+                                                                     
+     .panel-heading
+      h1.panel-title Detailed Block Information
+     table.table.table-hover
+      tbody
+       tr.info
+        td#datapoint1( data-toggle="popover", data-placement="right", title="Block Nr", data-content = "This is the block number")
+       tr.info
+        td#datapoint2( data-toggle="popover", data-placement="right", data-content="The number of transactions contained in this block", title="Transaction Count")
+       tr.info
+        td#datapoint3( data-toggle="popover", data-placement="right", title="Block Hash", data-content="This is the hash of the block") 
+       tr.info
+        td#datapoint4( data-toggle="popover", data-placement="right", title="Previous Block Hash", data-content="This is the Hash of the previous block")
+       tr.info
+        td#datapoint6( data-toggle="popover", data-placement="right", title="Merkle Root", data-content="Each transaction has an identifying hash. Each of these hashes are 'hashed' again to one another until just one hash remains. This is called the Merkle root and is included in the block header.")
+       tr.info
+        td#datapoint7( data-toggle="popover", data-placement="right", title="Time", data-content="This is the exact time the block was broadcast to the network")
+       tr.info
+        td#datapoint10( data-toggle="popover", data-placement="right", title="Bits", data-content="The calculated difficulty target being used for this block")
+       tr.info
+        td#datapoint11( data-toggle="popover", data-placement="right", title="Difficulty", data-content="Difficulty is a measure of how difficult it is to find a hash below a given target")
+       tr.info
+        td#datapoint12( data-toggle="popover", data-placement="right", title="Reward", data-content="Each miner competes to solve a difficult mathematical problem. He/she who wins the mathematical race earns a reward in the form of  bitcoins, litecoins or dogecoins")
+       tr.info
+        td#datapoint14( data-toggle="popover", data-placement="right", title="Total Out", data-content="The total value of all the transactions in the block")
+      
+     .panel.panel-primary 
+      .panel-heading              
+         h3.panel-title Previous block time
+        .panel-body    
+         h1#prevtime 00:00 
+     .panel.panel-primary 
+      .panel-heading    
+         h3.panel-title Time since last Block 
+        .panel-body
+         h1#watch  00:00
+      script(type='text/javascript', src='/javascripts/stopwatch.js') 
+     .panel.panel-primary
+      .panel-heading            
+         h3.panel-title  
+          span.glyphicon.glyphicon-plus
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapseOne')  % of possible Bitcoins in circulation 
+       #collapseOne.panel.collapse.collapse
+        .panel-body    
+         |This is the % number of bitcoins mined or rather now available to the public. 
+         |In the not too distant future all bitcoins shall be mined. 
+         |All Bitcoins will be mined by 2110 to 2140.
+      svg#fillgauge1(width='97%', height='250')
+      script(type='text/javascript', src='/javascripts/gauge.js')
+      script(type='text/javascript', src='/javascripts/LiquidFillGauge.js')
+      script(type='text/javascript', src='/javascripts/d3.js')    
+    #area2.col-sm-8.col-md-8.col-lg-8.col-xs-10
+      #areatext Please wait, bitcoin blocks on the way!!
+       script#bits(type='text/javascript', src='/javascripts/d3visual.js')
+       script(type='text/javascript', src='/javascripts/d3.js')
+    #sidebar-wrapper.col-sm-2.col-md-2.col-lg-2.col-xs-2.panel.panel-primary
+      .panel-heading
+         h5.panel-title 
+          span.glyphicon.glyphicon-plus
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapseTwo')  What is this? 
+       #collapseTwo.panel.collapse.collapse
+        .panel-body    
+        |This is the bitcoin, dogecoin, litecoin blockchains in realtime. Each coin represents a block and each block is linked to the previous one.
+        |Bitcoin blocks are slightly longer in forming (around 10 minutes) compared with litecoin and dogecoin.  
+        |When each block is created, coins are awarded to the miners who worked on the block. 
+      .panel-heading   	
+         h4.panel-title
+          span.glyphicon.glyphicon-plus
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapseThree') Why is this interesting?
+       #collapseThree.panel.collapse.collapse
+        .panel-body   
+        |The Blockchain is a decentralised online public ledger where all transactions are stored. It is managed by a peer to peer network of computers and thus removes the need of having  a central financial authority.                                          It also allows payments from one person to another without using a 3rd party (bank).
+      .panel-heading
+         h4.panel-title
+          span.glyphicon.glyphicon-plus
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapseFour')  How are bitcoins, litecoins, and dogecoins generated?
+       #collapseFour.panel.collapse.collapse
+        .panel-body
+        |For each block, computer(s) known as miners try to solve a complex mathematical puzzle. The first computer to solve the puzzle earns a reward in btc, ltc or doge depending on the blockchain.  
+        |500 Ltc for a block or 50,000 doge for a dogecoin block.
+      .panel-heading		
+         h4.panel-star
+         | Further Information
+        .panel-body
+          a(href="https://www.blockchain.info" target ="_blank") Bitcoin Blockchain info
+          br
+          a(href="https://www.coinwarz.com" target = "_blank") CoinWarz
+          br    
+          a(href="https://www.block-explorer.com" target = "_blank") Litecoin Blockchain info
+          br
+          a(href="https://dogechain.info/chain/Dogecoin" target = "_blank") Dogecoin Blockchain info   
+          br
+          a(href="https://www.coindesk.com/news" target = "_blank") Coindesk Latest news 
+          br
+          a(href="https://en.bitcoin.it/wiki/Main_Page" target = "_blank") Dogecoin Blockchain info     
+      span.hidden-xs
+       img.img-responsive(src="http://www.coincadence.com/api/embed/500x250")
+      span.hidden-xs
+        iframe#widget-ticker-preview(src='//www.coingecko.com/en/widget_component/ticker/dogecoin/btc', align='center',  style='border:none;', scrolling='no', frameborder='0', allowtransparency='true')
+      span.hidden-xs
+        iframe#widget-ticker-preview(src='//www.coingecko.com/en/widget_component/ticker/litecoin/btc', align='center', style='border:none; height:139px; width:279;', scrolling='no', frameborder='0', allowtransparency='true')
+  #footer.navbar.navbar-default.navbar-fixed-bottom
+     .container
+       p.navbar-text  Please donate to xx	 
