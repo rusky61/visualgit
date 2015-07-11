@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Cryptocurrency visualization</title>
+	<link rel="stylesheet" type="text/css" href="main.css">
+	<script type="text/javascript" src="d3.js"></script>
+	<link href="bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="d3.js"></script>
+	<script src="bootstrap.min.js"></script>
+	<script type="text/javascript" src="d3.js"></script>
+
+	
+   	
+
+</head>
+
+<body>
+<div id="header" class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar-header">
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+            <i class="icon-reorder"></i>
+        </button>
+        <a class="navbar-brand" >
+            Blockchains.cc
+        </a>
+    </div>
+    <nav class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="#" class ="crypto">Bitcoin
+			<img src="Bitcoin.png" style="width:30px;height:30px">
+			</a>
+		
+            </li>
+            <li>
+              <a href="#" class ="crypto">Litecoin
+                	<img src="Litecoin.png" style="width:30px;height:30px">
+
+                    </a>
+                
+            </li>
+            <li>
+                <a href="#" class ="crypto">Dogecoin
+			<img src="Dogecoin.png" style="width:30px;height:30px">
+			</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+            <li class="dropdown">
+                
+                <ul class="dropdown-menu pull-right">
+                    <li><a href="#">Log Out</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div class="container-fluid">
+<div class="row">
+	
+  	
+
+
+<div id ="left-table" class ="col-sm-2 col-md-2 col-lg-2 panel panel-default table-responsive">
+<table class="table table-hover table-responsive">
+	
+			     <thead>
+                             <th class ="row-colour" > Block information</th>
+                             <th class ="row-colour">Value</th>
+                            </thead>
+	
+    	<tbody >
+	<tr class="info"><td> Block Number</td><td id="datapoint1"></td></tr>
+	<tr class="info"><td>Block reward</td><td  id="datapoint2" ></td></tr>
+
+	<tr class="info"><td>Difficulty</td><td  id="datapoint3" ></td>
+	<tr class="info"><td>Transactions</td><td  id="datapoint4" ></td>
+	
+    	<tr class="info"><td>Index</td><td  id="datapoint5"></td></tr>
+	<tr class="info"><td>Transactions</td><td  id="datapoint6"></td></tr>
+	<tr class="info"><td>Total Sent</td><td  id="datapoint7"></td></tr>
+	<tr class="info"><td>Relayed By</td><td  id="datapoint8"></td></tr>
+	<tr class="info"><td>Size(KB)</td><td id="datapoint9"></td></tr>
+	
+	</tbody>
+    </table>
+<img src="http://www.coincadence.com/api/embed/500x250" class="img-responsive">
+
+</div>
+
+
+<div id="area2" class="col-sm-9 col-md-9 col-lg-9"></div>
+
+<div id="sidebar-wrapper" class="col-sm-1 col-md-1 col-lg-1 panel panel-default panel-height" >
+            
+                <div class="list-group">
+	
+                    <a class= "list-group-item" id="release"> Release Block</a>
+                        
+			                  
+                    <a class ="list-group-item" id="release"
+     			 href="https://www.blockchain.info">Blockchain Info</a>
+                    
+                    <a class="list-group-item" id="release" 							 href="https://www.coinwarz.com">CoinWarz</a>
+                    
+
+          
+                </div>
+</div>
+   
+</div>
+</div>
+
+<script>
+	var elmnt = document.getElementById("area2");
+        
+	var h = 950;
+	var w = elmnt.offsetWidth;
+	radius = 6;
+  
+    var coinSize = 40;
+    var t0 = Date.now();
+    var data = {
+        "nodes":[
+            {"index":0, "block_nr":1, "block_reward": 25, "trans":123456, "diff": 40300003032789, "vol": 49.2},
+            {"index":1, "block_nr":2,"block_reward": 25, "trans":123456, "diff": 40300003032789, "vol": 49.2},
+            {"index":2, "block_nr":3,"block_reward": 25, "trans":123456, "diff": 40300003032789, "vol": 49.2},
+            {"index":3, "block_nr":4,"block_reward": 25, "trans":123456, "diff": 40300003032789, "vol": 49.2}
+
+        ],
+        "links":[
+            {"source":0,"target":1},
+            {"source":1,"target":2},
+            {"source":2,"target":3}
+        ]
+    };
+
+//D3 force layout setup
+var force = d3.layout.force()
+    .gravity(0.01)
+    .charge(-30)
+    .linkDistance(60)
+    .nodes(data.nodes)
+    .links(data.links)
+    .size([w, h])
+    .start();
+
+//create the main body + SVG elements
+var svgContainer = d3.select("#area2").append("svg")	
+    .attr("width", w)
+    .attr("height", h);
+    
+   
+    
+
+
+var link = svgContainer.selectAll(".link")
+    .data(data.links)
+    .enter().append("line")
+    .attr("class", "link");
+/*
+// Define the div for the tooltip
+var div = d3.select("#area2").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+*/
+
+function tableUpdate(d) {
+	 d3.select(this).transition()
+        .duration(50)
+        .attr("width", coinSize + 10)
+        .attr("height", coinSize + 10);
+   
+	d3.select("#datapoint1")
+	   .html(d.block_nr);
+	d3.select("#datapoint2")
+	   .html(d.block_reward);
+	d3.select("#datapoint3")
+	   .html(d.diff);
+	d3.select("#datapoint4")
+   	    .html(d.trans);
+	d3.select("#datapoint5")
+	   .html(d.index);
+}
+
+function resizeCoin(d){
+    d3.select(this)
+        .transition()
+        .duration(50)
+        .attr("width", coinSize)
+        .attr("height", coinSize);
+}
+	
+
+
+var node = svgContainer.selectAll("image")
+    .data(data.nodes)
+    .enter().append("image")
+    .attr("xlink:href", "Bitcoin.png")
+    .attr("width", coinSize)//diameter
+    .attr("height", coinSize)
+    .attr("r", radius - .75)
+    .attr("x",-20)
+    .attr("y",-20)
+
+    .on("mouseover", tableUpdate)
+    .on("mouseout", resizeCoin )
+    .call(force.drag);
+
+
+force.on("tick", function() {
+
+node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(w - 15, d.x)); })
+    .attr("cy", function(d) { return d.y = Math.max(15, Math.min(h - 15, d.y)); });
+
+link.attr("x1", function(d) { return d.source.x; })
+    .attr("y1", function(d) { return d.source.y; })
+    .attr("x2", function(d) { return d.target.x; })
+    .attr("y2", function(d) { return d.target.y; });
+
+node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
+	
+});
+
+var s = 3;
+var t = 4;
+var b_nr= 5;
+
+d3.select("#release").on("click", function() {
+    //window.alert("Releasing ...");
+    data.links.push({"source":s++,"target":t++});
+    data.nodes.push({"x":10, "y":10, "block_nr":b_nr++, "block_reward": 25, "trans":123456, "diff": 40300003032789, "vol": 49.2});
+    
+    link = link.data(data.links);
+    link.enter().insert("line", "image")
+      .attr("class", "link");
+    
+    force.linkStrength(function(d,i) {
+        if (d.target.index == s) return 0.01; 
+        return 1; })
+
+    node = node.data(data.nodes);
+    
+    node.enter().insert("image")
+        .attr("xlink:href", "Bitcoin.png")
+        .attr("width", coinSize)//diameter
+        .attr("height", coinSize)
+        .attr("x",-(coinSize/2))
+        .attr("y",-(coinSize/2))
+        .on("mouseover", tableUpdate )        
+        .on("mouseout", resizeCoin )
+        .call(force.drag);
+    
+    force.start();
+
+});
+
+
+
+</script>
+
+
+
+	
+
+</body>
+</html>
+
+
+
+
+
