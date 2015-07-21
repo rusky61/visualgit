@@ -1,4 +1,12 @@
 var coin = 2;
+localStorage.setItem('coins', 'ltc');
+var x = localStorage.getItem('coins');
+var coin = 1;
+
+
+
+
+
 var data = {
 	           "nodes":[
 		   ],

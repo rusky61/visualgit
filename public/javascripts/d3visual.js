@@ -1,5 +1,7 @@
-
+//var x = localStorage.getItem('coins');
 var coin = 1;
+//localStorage.setItem('coins', "btc");
+//loadLiquidFillGauge(checkcoin('btc'), 60.2, config2);
 
 var data = {
 	           "nodes":[
@@ -21,7 +23,7 @@ var t0 = Date.now();
 // Define the div for the tooltip
  var div = d3.select("#area2").append("div")   
 .attr("class", "tooltip")               
-  // .style("opacity", 0);
+  .style("opacity", 0);
 
 show();
 
@@ -245,14 +247,28 @@ function hideTooltip(d){
         .style("opacity", 0);  
 }
 
-resize();
 
+/*event listeners to resize svg. scroll uses pageYoffset to ensure svg resizes.
+*resize used to set width height onload.
+*/
+resize();
 window.addEventListener("resize", resize);
+
+window.addEventListener("scroll", resize);
 
 function resize() {
 
- width = elmnt.offsetWidth, height = window.innerHeight;
- svgContainer.attr("width", width).attr("height", height);
+ width = elmnt.offsetWidth, height = window.innerHeight + window.pageYOffset;
+
+ 	svgContainer.attr("width", width).attr("height", height);
+
+ /* 
+ if((window.innerHeight + window.scrollY) >= document.body.offsetHeight){
+	 alert("bottom is reached");
+	} else{
+ 	svgContainer.attr("width", width).attr("height", height);
+	}
+*/
  force.size([width, height]).resume();
 
 }

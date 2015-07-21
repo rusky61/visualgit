@@ -1,4 +1,7 @@
 var coin = 3;
+
+localStorage.setItem('coins', 'doge');
+
 var data = {
 	           "nodes":[
 		   ],

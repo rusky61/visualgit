@@ -1,3 +1,20 @@
+        //loadLiquidFillGauge("fillgauge1", 60.2, config2);
+	//loadLiquidFillGauge("fillgauge2", 60, config1);
+	//loadLiquidFillGauge("fillgauge3", 81, config3);
+var config2 = liquidFillGaugeDefaultSettings();
+    config2.circleColor = "#AA7D39";
+    config2.textColor = "#553300";
+    config2.waveTextColor = "#805615";
+    config2.waveColor = "#AA7D39";
+    config2.circleThickness = 0.1;
+    config2.circleFillGap = 0.2;
+    config2.textVertPosition = 0.8;
+    config2.waveAnimateTime = 2000;
+    config2.waveHeight = 0.3;
+    config2.waveCount = 1;
+ 
+
+
 function liquidFillGaugeDefaultSettings(){
     return {
         minValue: 0, // The gauge minimum value.
