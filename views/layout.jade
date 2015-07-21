@@ -1,57 +1,16 @@
 doctype html
 html(lang="en")
  head
-  meta(http-equiv="content-type", content="text/html; charset=utf-8")
+  meta(http-equiv="X-UA-Compatible", content="IE=edge")
   title Cryptocurrency visualization
-  link(rel="icon",href="/favicon.ico")
-  link(href="stylesheets/bootstrap.min.css", rel="stylesheet")
+  link(rel="icon",href="images/favicon.ico")
+  link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css", rel="stylesheet")
   link(rel="stylesheet", href="stylesheets/main.css")
   script(type="text/javascript", src="/javascripts/d3.js")
-  
-  script(src="javascripts/jquery-1.11.2.min.js")
-  script(src="javascripts/bootstrap.min.js")
-  script(type="text/javascript", src="/javascripts/stopwatch.js")
-  script(type="text/javascript", src="/javascripts/d3visual.js") 
-  script(type="text/javascript", src="/javascripts/d3visual_lite.js")
+  script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
   script(type='text/javascript', src='/primus/primus.js')
-
- script.
-   $(document).ready(function(){
-   $('[data-toggle="popover"]').popover({ trigger: "hover"
-   });
-   });
- script.
-   $(document).ready(function(){
-   $('#lite').click(function(){
-   $('#area2').empty();
-   $.getScript('/javascripts/d3visual_lite.js')
-     closesocket(coin);
-     triggerTime (coin);
-     console.log('socket '+coin+' closed');
-     
-   });
-   });
- script.
-   $(document).ready(function(){
-   $('#bit').click(function(){
-   $('#area2').empty();
-   $.getScript('/javascripts/d3visual.js')
-     closesocket(coin);
-     triggerTime (coin);
-     console.log('socket '+coin+' closed');
-   });
-   });  
- script.
-   $(document).ready(function(){
-   $('#doge').click(function(){
-   $('#area2').empty();
-   $.getScript('/javascripts/d3visual_doge.js')
-     closesocket(coin);
-     triggerTime (coin);
-     console.log('socket '+coin+' closed');
-      
-   });
-   });  
+  script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
+ 
  body
   #header.navbar.navbar-default.navbar-fixed-top
    .navbar-header
@@ -117,23 +76,49 @@ html(lang="en")
         .panel-body
          h1#watch  00:00
       script(type='text/javascript', src='/javascripts/stopwatch.js') 
-     .panel.panel-primary
+     #bitcoincirc.panel.panel-primary
       .panel-heading            
          h3.panel-title  
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseOne')  % of possible Bitcoins in circulation 
-       #collapseOne.panel.collapse.collapse
+       #collapseOne.panel
         .panel-body    
          |This is the % number of bitcoins mined or rather now available to the public. 
          |In the not too distant future all bitcoins shall be mined. 
          |All Bitcoins will be mined by 2110 to 2140.
-      svg#fillgauge1(width='97%', height='250')
+      svg#fillgauge1(width='100%', height = '100%', viewBox='-10 0 400 400')
+      script(type='text/javascript', src='/javascripts/gauge.js') 
+     #litecoincirc.panel.panel-primary.collapse
+      .panel-heading            
+         h3.panel-title  
+          span.glyphicon.glyphicon-plus
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapsetwo')  % of possible Litecoins in circulation 
+       #collapsetwo.panel
+        .panel-body    
+         |This is the % number of litecoins mined or rather now available to the public. 
+         |In the not too distant future all litecoins shall be mined. 
+         |All Litecoins are projected to be mined by 2140.
+      svg#fillgauge2(width='100%', height = '100%', viewBox='-10 0 120 120')
       script(type='text/javascript', src='/javascripts/gauge.js')
-      script(type='text/javascript', src='/javascripts/LiquidFillGauge.js')
-      script(type='text/javascript', src='/javascripts/d3.js')    
-    #area2.col-sm-8.col-md-8.col-lg-8.col-xs-10
-      #areatext Please wait, bitcoin blocks on the way!!
-       script#bits(type='text/javascript', src='/javascripts/d3visual.js')
+
+     #dogecoincirc.panel.panel-primary.collapse
+      .panel-heading            
+         h3.panel-title  
+          span.glyphicon.glyphicon-plus
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapsetwo')  % of possible Dogecoins in circulation 
+       #collapsethree.panel
+        .panel-body    
+         |This is the current  % number of dogecoins mined. As Dogeocoin is an inflationary coin, 98 billion doge is already mined. Since February 2016 each block gives a reward of 10,000 doge or an extra 5% yearly.   
+         
+         
+      svg#fillgauge3(width='100%', height = '100%' viewBox='-10 0 120 120')
+      script(type='text/javascript', src='/javascripts/gauge.js')
+      script.   
+         loadLiquidFillGauge("fillgauge3", 100.2, config3);
+        
+    #area2.col-sm-8.col-md-8.col-lg-8.col-xs-10 
+     #areatext Please wait bitcoin blocks on the way!!
+       
        script(type='text/javascript', src='/javascripts/d3.js')
     #sidebar-wrapper.col-sm-2.col-md-2.col-lg-2.col-xs-2.panel.panel-primary
       .panel-heading
@@ -142,16 +127,16 @@ html(lang="en")
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseTwo')  What is this? 
        #collapseTwo.panel.collapse.collapse
         .panel-body    
-        |This is the bitcoin, dogecoin, litecoin blockchains in realtime. Each coin represents a block and each block is linked to the previous one.
-        |Bitcoin blocks are slightly longer in forming (around 10 minutes) compared with litecoin and dogecoin.  
-        |When each block is created, coins are awarded to the miners who worked on the block. 
+        |This is the bitcoin, dogecoin, litecoin blockchains in realtime. Each coin represents a block that contains all the most recent bitcoin, dogecoin or litecoin transactions (the time frame is different for each block) and a link to the previous block.
+        |Bitcoin blocks take around 10 minutes to be created compared with litecoin (2 mins 30) and dogecoin (1 minute).
+        
       .panel-heading   	
          h4.panel-title
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseThree') Why is this interesting?
        #collapseThree.panel.collapse.collapse
         .panel-body   
-        |The Blockchain is a decentralised online public ledger where all transactions are stored. It is managed by a peer to peer network of computers and thus removes the need of having  a central financial authority.                                          It also allows payments from one person to another without using a 3rd party (bank).
+        |The Blockchain is a decentralised online public ledger where all transactions are stored. It is managed by a peer to peer network of computers and thus removes the need of having  a central financial authority. It also allows payments from one person to another without using a 3rd party (bank).
       .panel-heading
          h4.panel-title
           span.glyphicon.glyphicon-plus
@@ -159,7 +144,7 @@ html(lang="en")
        #collapseFour.panel.collapse.collapse
         .panel-body
         |For each block, computer(s) known as miners try to solve a complex mathematical puzzle. The first computer to solve the puzzle earns a reward in btc, ltc or doge depending on the blockchain.  
-        |500 Ltc for a block or 50,000 doge for a dogecoin block.
+        |The rewards are currently set to 25 btc, 50 ltc and 10,000 doge for mining each respective block.
       .panel-heading		
          h4.panel-star
          | Further Information
@@ -178,9 +163,63 @@ html(lang="en")
       span.hidden-xs
        img.img-responsive(src="http://www.coincadence.com/api/embed/500x250")
       span.hidden-xs
-        iframe#widget-ticker-preview(src='//www.coingecko.com/en/widget_component/ticker/dogecoin/btc', align='center',  style='border:none;', scrolling='no', frameborder='0', allowtransparency='true')
+      iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/dogecoin/usd?id=dogecoin' style='border:none; height:100%; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true', )
+ 
       span.hidden-xs
-        iframe#widget-ticker-preview(src='//www.coingecko.com/en/widget_component/ticker/litecoin/btc', align='center', style='border:none; height:139px; width:279;', scrolling='no', frameborder='0', allowtransparency='true')
+       iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/litecoin/usd?id=litecoin' style='border:none; height:100%; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true', )
+          
   #footer.navbar.navbar-default.navbar-fixed-bottom
      .container
-       p.navbar-text  Please donate to xx	 
+       p.navbar-text  Please donate to xx          
+       
+  script(type="text/javascript", src="/javascripts/stopwatch.js")
+  script#bits(type='text/javascript', src='/javascripts/d3visual.js') 
+  script(type='text/javascript', src='/javascripts/gauge.js')
+ script.
+   $(document).ready(function(){
+   $('[data-toggle="popover"]').popover({ trigger: "hover"   
+   });
+   });
+ 
+ script.
+   $(document).ready(function(){
+   $('#lite').click(function(){
+   $('#area2').empty();
+   $ ('#litecoincirc').show();
+   $ ('#bitcoincirc').hide();
+   $ ('#dogecoincirc').hide();
+     
+   $.getScript('/javascripts/d3visual_lite.js')
+     closesocket(coin);
+     triggerTime (coin);
+     console.log('socket '+coin+' closed');
+     
+   });
+   });
+ script.
+   $(document).ready(function(){
+   $('#bit').click(function(){
+   $('#area2').empty();
+   $('#bitcoincirc').show();
+   $('#litecoincirc').hide();
+   $('#dogecoincirc').hide();
+   $.getScript('/javascripts/d3visual.js')
+     closesocket(coin);
+     triggerTime (coin);
+     console.log('socket '+coin+' closed');
+   });
+   });  
+ script.
+   $(document).ready(function(){
+   $('#doge').click(function(){
+   $('#area2').empty();
+   $('#dogecoincirc').show();
+   $('#litecoincirc').hide();
+   $('#bitcoincirc').hide();
+   $.getScript('/javascripts/d3visual_doge.js')
+     closesocket(coin);
+     triggerTime (coin);
+     console.log('socket '+coin+' closed');
+      
+   });
+   });
