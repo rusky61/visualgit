@@ -1,0 +1,155 @@
+ 
+  
+	var elmnt = document.getElementById("area2");
+        
+	var h = 950;
+	var w = elmnt.offsetWidth;
+	radius = 6;
+  
+    var coinSize = 40;
+    var t0 = Date.now();
+    var data
+
+function getdata(callback){
+
+		var primus = Primus.connect()
+		primus.on("open", function (){
+		console.log("connected ")
+		});
+		primus.on("data", function (data){
+		
+		 
+		return callback(data)
+
+	});
+}
+
+function check(data){
+ 
+var data = getdata(callback);
+
+
+}
+
+//D3 force layout setup
+var force = d3.layout.force()
+    .gravity(0.01)
+    .charge(-30)
+    .linkDistance(60)
+    .nodes(data.nodes)
+    .links(data.links)
+    .size([w, h])
+    .start();
+
+//create the main body + SVG elements
+var svgContainer = d3.select("#area2").append("svg")	
+    .attr("width", w)
+    .attr("height", h);
+    
+   
+    
+
+
+var link = svgContainer.selectAll(".link")
+    .data(data.links)
+    .enter().append("line")
+    .attr("class", "link");
+/*
+// Define the div for the tooltip
+var div = d3.select("#area2").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+*/
+
+function tableUpdate(d) {
+	 d3.select(this).transition()
+        .duration(50)
+        .attr("width", coinSize + 10)
+        .attr("height", coinSize + 10);
+   
+	d3.select("#datapoint1")
+	   .html(d.block_nr);
+	d3.select("#datapoint2")
+	   .html(d.block_reward);
+	d3.select("#datapoint3")
+	   .html(d.diff);
+	d3.select("#datapoint4")
+   	    .html(d.trans);
+	d3.select("#datapoint5")
+	   .html(d.index);
+}
+
+function resizeCoin(d){
+    d3.select(this)
+        .transition()
+        .duration(50)
+        .attr("width", coinSize)
+        .attr("height", coinSize);
+}
+	
+
+
+var node = svgContainer.selectAll("image")
+    .data(data.nodes)
+    .enter().append("image")
+    .attr("xlink:href", "/images/Bitcoin.png")
+    .attr("width", coinSize)//diameter
+    .attr("height", coinSize)
+    .attr("r", radius - .75)
+    .attr("x",-20)
+    .attr("y",-20)
+
+    .on("mouseover", tableUpdate)
+    .on("mouseout", resizeCoin )
+    .call(force.drag);
+
+
+force.on("tick", function() {
+
+node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(w - 15, d.x)); })
+    .attr("cy", function(d) { return d.y = Math.max(15, Math.min(h - 15, d.y)); });
+
+link.attr("x1", function(d) { return d.source.x; })
+    .attr("y1", function(d) { return d.source.y; })
+    .attr("x2", function(d) { return d.target.x; })
+    .attr("y2", function(d) { return d.target.y; });
+
+node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
+	
+});
+
+var s = 3;
+var t = 4;
+var b_nr= 5;
+
+ function updateblocks(data) {
+    //window.alert("Releasing ...");
+    data.links.push({"source":s++,"target":t++});
+    data.nodes.push(data);
+    
+    link = link.data(data.links);
+    link.enter().insert("line", "image")
+      .attr("class", "link");
+    
+    force.linkStrength(function(d,i) {
+        if (d.target.index == s) return 0.01; 
+        return 1; })
+
+    node = node.data(data.nodes);
+    
+    node.enter().insert("image")
+        .attr("xlink:href", "/images/Bitcoin.png")
+        .attr("width", coinSize)//diameter
+        .attr("height", coinSize)
+        .attr("x",-(coinSize/2))
+        .attr("y",-(coinSize/2))
+        .on("mouseover", tableUpdate )        
+        .on("mouseout", resizeCoin )
+        .call(force.drag);
+    
+    force.start();
+
+}
+
+
+
