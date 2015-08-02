@@ -118,8 +118,28 @@ function updateBlock(nodes){
 	
         .on("mouseover",tableUpdate)
         .on('dblclick', function (d){window.open('https://dogechain.info/block/'+d.height)})    
-        .on('mousemove', showToolTip)  
-	.on("mouseout", resizeCoin)
+        .on('mousemove', function(d){
+	/*
+	var matrix = this.getScreenCTM()
+	.translate(+this.getAttribute("cx"),
+		   +this.getAttribute("cy"));
+   */
+	  
+        div.transition()       
+        .duration(500)
+        .style("opacity", 1); 
+         div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")        
+//	.style('top', (d3.event.pageY - 100) + 'px')	
+//	.style('left',(d3.event.pageX - 390) + 'px');
+	.style("left",
+	       (d.x + 50 + "px"))
+	.style("top",
+	       (d.y +"px"));
+	})  
+	.on("mouseout", function (d) {
+		
+		hideTooltip.call(this, d);
+                resizeCoin.call(this, d);})
 
         .call(force.drag);
      
@@ -204,7 +224,7 @@ function tableUpdate(d) {
 //	showToolTip(d);
 	
 }
-
+/*
 function showToolTip(d){
     div.transition()       
         .duration(500)
@@ -214,11 +234,6 @@ function showToolTip(d){
 	.style('left',(d3.event.pageX - 390) + 'px');
 }    
 
-
-	    
-
-
-/*
 function latestBlock(){
 	
 var last = data.nodes.slice(-1)[0] 

@@ -1,7 +1,7 @@
 //var x = localStorage.getItem('coins');
 var coin = 1;
 //localStorage.setItem('coins', "btc");
-//loadLiquidFillGauge(checkcoin('btc'), 60.2, config2);
+
 
 var data = {
 	           "nodes":[
@@ -13,21 +13,25 @@ var data = {
 
 var elmnt = document.getElementById("area2");
         
-//var h = window.innerHeight;
-//var w = elmnt.offsetWidth;
+/*
+ *Global variables
+ */
 var radius = 6;
   
 var coinSize = 40;
 var t0 = Date.now();
 
-// Define the div for the tooltip
- var div = d3.select("#area2").append("div")   
-.attr("class", "tooltip")               
-  .style("opacity", 0);
+
+ var div = d3.selectAll("#area2").append("div")
+ //	.selectAll("image")   
+	.attr("class", "tooltip")               
+        .style("opacity", 0);
 
 show();
 
-//D3 force layout setup
+/*
+ * Step 3: D3 force layout setup. Create force layout object and define the properties.
+*/
 var force = d3.layout.force()
     .gravity(0.01)
     .charge(-30)
@@ -35,18 +39,24 @@ var force = d3.layout.force()
     .nodes(data.nodes)
     .links(data.links)
    // .size([w, h])
-    .start()
+   // .start()
    
-//create the maforce.call(tip);in body + SVG elements
-var svgContainer = d3.select("#area2").append("svg")	
-    //.attr("width", w)
-    //.attr("height", h)
-     
+/*
+ *Step 2: Select the DOM element area2 and append an SVG element to it that will be used for the visualisation.
+ */ 
+var svgContainer = d3.select("#area2").append("svg")	  
+
+/*
+ *Step 4: Add links to the visualisation. attr() used to set HTML attributes.
+ */
 var link = svgContainer.selectAll(".link")
     .data(data.links)
     .enter().append("line")
     .attr("class", "link");
 
+/*
+ *Step 4: Add nodes to the visualisation. attr() used to set HTML attributes. e.g. append bitcoin image.set width, height, radius
+ */
 var node = svgContainer.selectAll("image")
     .data(data.nodes)
     .enter().append("image")
@@ -56,14 +66,16 @@ var node = svgContainer.selectAll("image")
     .attr("r", radius - .75)
     .attr("x",-20)
     .attr("y",-20)
-
-    //.on("mouseover", tableUpdate)
-    
-    //.on("mouseout", resizeCoin )
     .call(force.drag);
+/*
+ *.call(force.drag) used to allow interactive dragging when a user selects a node.
+ */
 
-
-
+/*
+ *Step 5
+ *force.on(tick)event listener that updates all nodes to new positions.
+ * Also updates positions of the links.
+ */
 
 force.on("tick", function() {
 
@@ -83,27 +95,18 @@ var s = 0;
 var t = 1;
 var started = 0;
 
-//d3.select("#release").on("click", updateBlock);
-
 
 
 function updateBlock(nodes){
-    //window.alert("Releasing ...");
-    
-    //if (data.nodes.length > 1){
-    //	data.links.push({"source":s++,"target":t++});
-    //}
     data.nodes.push({"x":10, "y":10, "height":nodes.height, "hash": nodes.hash, "branch":nodes.branch, "previous_block_hash": nodes.previous_block_hash, "reward": nodes.reward, 'confirmations': nodes.confirmations, 'merkle_root': nodes.merkle_root, 'time': nodes.time, 'nonce':nodes.nonce, 'bits':nodes.bits, 'difficulty':nodes.difficulty, 'reward':nodes.reward, 'fees':nodes.fees, 'total_out':nodes.total_out, 'size':nodes.size, 'transactions_count':nodes.transactions_count, });
      if (data.nodes.length > 1){
 	data.links.push({"source":s++,"target":t++});
      }
-
-    //var last = data.nodes.slice(-1)[0]; 
     
     link = link.data(data.links);
-    link.enter().insert("line", "image")
-      .attr("class", "link");
-     
+    link.enter().insert("line", "image")   
+    .attr("class", "link");
+      
     force.linkStrength(function(d,i) {
         if (d.target.index == s) return 0.01;
         return 1; })
@@ -111,16 +114,41 @@ function updateBlock(nodes){
     node = node.data(data.nodes);
 
     node.enter().insert("image")
-        .attr("xlink:href", "/images/Bitcoin.png")
+    .attr("xlink:href", "/images/Bitcoin.png")
         .attr("width", coinSize)//diameter
         .attr("height", coinSize)
         .attr("x",-(coinSize/2))
         .attr("y",-(coinSize/2))
 	
         .on("mouseover", tableUpdate)
-        .on('mousemove', showToolTip) 
+        .on('mousemove', function(d){
+	/*
+	var matrix = this.getScreenCTM()
+	.translate(+this.getAttribute("cx"),
+		   +this.getAttribute("cy"));
+   */
+	  
+    div.transition()       
+        .duration(500)
+        .style("opacity", 1); 
+    div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")        
+//	.style('top', (d3.event.pageY - 100) + 'px')	
+//	.style('left',(d3.event.pageX - 390) + 'px');
+	.style("left",
+	       (d.x + 50 + "px"))
+	.style("top",
+	       (d.y +"px"));
+	})
+	   
+	   
+	   
+	   
+	   
         .on('dblclick', function (d){window.open('https://blockchain.info/block/'+d.hash)})
-	.on("mouseout", resizeCoin)
+	.on("mouseout", function (d) {
+		
+		hideTooltip.call(this, d);
+                resizeCoin.call(this, d);})
         .call(force.drag);
      
        	
@@ -206,16 +234,8 @@ function firstTableUpdate(d) {
 	//d3.select("#datapoint16")
 	  // .html(d.branch);
 }
+ 
 
-function showToolTip(d){
-
-    div.transition()       
-        .duration(500)
-        .style("opacity", 1); 
-    div.html("Block Number "+d.height + "<br/>"+ 'click me')        
-	.style('top', (d3.event.pageY - 100) + 'px')	
-	.style('left',(d3.event.pageX - 390) + 'px');
-}
 
 
 function latestBlock(callback){
@@ -254,25 +274,34 @@ function hideTooltip(d){
 resize();
 window.addEventListener("resize", resize);
 
-window.addEventListener("scroll", resize);
-
-function resize() {
-
- width = elmnt.offsetWidth, height = window.innerHeight + window.pageYOffset;
-
- 	svgContainer.attr("width", width).attr("height", height);
-
- /* 
- if((window.innerHeight + window.scrollY) >= document.body.offsetHeight){
-	 alert("bottom is reached");
-	} else{
- 	svgContainer.attr("width", width).attr("height", height);
-	}
+/*
+*Easier to have jquery event listener for scrolling. works better but still not convinced this is correct;
 */
- force.size([width, height]).resume();
+$(window).scroll(function(){
+height = $(window).scrollTop()+$(window).height();	
+if($(window).scrollTop() + $(window).height() < $(document).height()-20){
+	
+svgContainer.attr("width",width).attr("height", height);
 
 }
+force.size([width, height]).resume();
 
+});
+
+
+/*
+ *Resize SVG on resize of window.
+ */
+function resize() {
+
+	width = elmnt.offsetWidth, height = window.innerHeight + window.pageYOffset;
+ 	svgContainer.attr("width", width).attr("height", height);
+ 	force.size([width, height]).resume();
+}
+/*
+ *Step 6: websocket to bitcoin.toshi to fetch most recent block.
+ *
+ */
 
 var socketbtc = Primus.connect('wss://bitcoin.toshi.io');
 socketbtc.on('open', function(){
@@ -312,11 +341,7 @@ primus.on("open", function (){
 primus.on("data", function incoming(data){
 
 	console.log("new data incoming", data); 
-        //var nodes = [];
-       	//var nodes = JSON.parse(data);
-	//console.log("nodes", nodes);
-	//existingblock(nodes);
-//	show();
+
 	for (i = 0; i < data.length; i++) { 
 		updateBlock(data[i]);
 						

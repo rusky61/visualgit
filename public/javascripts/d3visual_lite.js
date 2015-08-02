@@ -1,7 +1,7 @@
 var coin = 2;
 localStorage.setItem('coins', 'ltc');
 var x = localStorage.getItem('coins');
-var coin = 1;
+
 
 
 
@@ -122,9 +122,31 @@ function updateBlock(nodes){
         .attr("y",-(coinSize/2))
 	
         .on("mouseover", tableUpdate)
-        .on('mousemove', showToolTip)      
+        .on('mousemove', function(d){
+	/*
+	var matrix = this.getScreenCTM()
+	.translate(+this.getAttribute("cx"),
+		   +this.getAttribute("cy"));
+   */
+	  
+    div.transition()       
+        .duration(500)
+        .style("opacity", 1); 
+    div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")     
+//	.style('top', (d3.event.pageY - 100) + 'px')	
+//	.style('left',(d3.event.pageX - 390) + 'px');
+	.style("left",
+	       (d.x + 50 + "px"))
+	.style("top",
+	       (d.y +"px"));
+	})
+     
         .on('dblclick', function (d){window.open('https://www.block-explorer.com/block/'+d.hash)})
-	.on("mouseout", resizeCoin)
+	.on("mouseout", function (d) {
+		
+		hideTooltip.call(this, d);
+                resizeCoin.call(this, d);})
+
         .call(force.drag);
      
        	
@@ -218,14 +240,7 @@ function tableUpdate(d) {
 //	showToolTip(d);
 	
 }
-function showToolTip(d){
-    div.transition()       
-        .duration(500)
-        .style("opacity", 1); 
-    div.html("Block Number "+d.height + "<br/>"+ 'click me')        
-	.style('top', (d3.event.pageY - 100) + 'px')	
-	.style('left',(d3.event.pageX - 390) + 'px');
-}
+
     
 /*
 function latestBlock(){
@@ -255,6 +270,17 @@ function hideTooltip(d){
 }
 
 resize();
+//instead used JQUERY function to resize svg on scroll event.
+$(window).scroll(function(){
+height = $(window).scrollTop()+$(window).height();	
+if($(window).scrollTop() + $(window).height() < $(document).height()-20){
+	
+svgContainer.attr("width",width).attr("height", height);
+
+}
+force.size([width, height]).resume();
+
+});
 
 window.addEventListener("resize", resize);
 
