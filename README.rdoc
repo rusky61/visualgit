@@ -1,1 +1,35 @@
-This is a readme;
+The visualisation shows the bitcoin, dogecoin and litecoin blockchains in realtime using the D3 visualisation library and more specifically the Force Directed Graph. The web application is hosted on a Raspberry Pi and the web server is created using node.js (server-side javascript). 
+
+Views directory:
+contains a jade templating file for HTML. layout.jade.
+
+Javascripts directory:
+
+3 javascripts files for each visualisation
+d3visual.js for bitcoin
+d3visual_lite.js for litecoin
+d3visual_doge.js for dogecoin
+stopwatch.js to determine how ling since last block.
+
+Additional visualisation for using the liquid fill gauge example from d3 to demonstrate number of coins mined. 
+gauge.js
+
+Stylesheets directory:
+Implemented with  bootstrap + CDN
+main.css to override bootstrap.
+
+bin directory:
+Latest 50 blocks stored locally as an array of objects in a JSON file.
+data.json = bitcoin
+data1.json = litecoin
+data2.json = dogecoin
+www.js 
+
+JS files to parse data from REST API.Potential to reimplement using WebSockets.Run every X minutes using crontab.
+
+updateblock.js
+updateBlockdoge.js
+
+
+app.js = used to define middleware, routes & configure app.
+
