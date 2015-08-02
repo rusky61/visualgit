@@ -3,6 +3,7 @@
 var fs = require('fs');
 var request = require("request");
 
+
 // idea is to emit latest block. worked form www file but not from here. 
 //var primus = new Primus (server, {transformer: 'websockets', parser: 'JSON'});
 //var Emitter = require ('primus-emitter');
@@ -11,8 +12,6 @@ var request = require("request");
 
 var test = request("https://bitcoin.toshi.io/api/v0/blocks/latest", function (error, response, body){
 test = JSON.parse(body);
-
-
 delete test.transaction_hashes;
 
 

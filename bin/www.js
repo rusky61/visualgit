@@ -1,32 +1,37 @@
 #!/usr/bin/env node
 
 /**
- * Module dependencies.
+ *
+ * Module dependencies
  */
 
 var app = require('../app');
 var debug = require('debug')('visualapp:server');
 var fs = require("fs");
-
+var hitcounter = 0;
 /**
- * Get port from environment and store in Express.
+ * Get port from environment and it store in Express.
  */
-
+var hit = 0;
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Create HTTP server
  */
+
 var Primus = require('primus');
 var http = require('http');
 
 var server = http.createServer(app);
+
+
 var primus = new Primus(server, {transformer : 'websockets', parser : 'JSON'});
 //var Emitter = require ('primus-emitter');
 //primus.use('emitter', Emitter); 
-server.listen(3000);
 
+
+server.listen(3000);
 
 
 /*
@@ -113,6 +118,7 @@ primus.on('connection', function(spark) {
 */
 
 primus.on('connection', function(socket)  {
+hit++;	
 	//console.log('connection was from ', spark.address)
 /*	
 	spark.write('welcome')
@@ -124,7 +130,7 @@ primus.on('connection', function(socket)  {
          console.log('received data from the client', data);
 	*/
 	// });
-	console.log('new connection');
+	console.log('new connection & hit number :'+hit);
 	socket.on('data', function(msg){
 	console.log('messgae received  ', msg);
 	if(msg =='bitcoin'){
