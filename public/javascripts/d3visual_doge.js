@@ -1,6 +1,8 @@
 var coin = 3;
-
-localStorage.setItem('coins', 'doge');
+/*
+ *for inline comment see d3visual.js
+ */
+//localStorage.setItem('coins', 'doge');
 
 var data = {
 	           "nodes":[

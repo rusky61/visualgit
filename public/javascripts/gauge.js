@@ -1,42 +1,6 @@
-
-var config2 = liquidFillGaugeDefaultSettings();
-    config2.circleColor = "#AA7D39"
-    config2.textColor = "#553300";
-    config2.waveTextColor = "#805615";
-    config2.waveColor = "#AA7D39";
-    config2.circleThickness = 0.1;
-    config2.circleFillGap = 0.2;
-    config2.textVertPosition = 0.8;
-    config2.waveAnimateTime = 2000;
-    config2.waveHeight = 0.3;
-    config2.waveCount = 1;
-    loadLiquidFillGauge("fillgauge1", 60.1, config2);
-
-var config1 = liquidFillGaugeDefaultSettings();
-    config1.circleColor = "#C0C0C0";
-    config1.textColor = "#553300";
-    config1.waveTextColor = "#805615";
-    config1.waveColor = "#C0C0C0";
-    config1.circleThickness = 0.1;
-    config1.circleFillGap = 0.2;
-    config1.textVertPosition = 0.8;
-    config1.waveAnimateTime = 2000;
-    config1.waveHeight = 0.3;
-    config1.waveCount = 1;
-loadLiquidFillGauge("fillgauge2", 60, config1);
-
-var config3 = liquidFillGaugeDefaultSettings();
-    config3.circleColor = "#CCFF66";
-    config3.textColor = "#553300";
-    config3.waveTextColor = "#805615";
-    config3.waveColor = "#CCFF66";
-    config3.circleThickness = 0.1;
-    config3.circleFillGap = 0.2;
-    config3.textVertPosition = 0.8;
-    config3.waveAnimateTime = 2000;
-    config3.waveHeight = 0.3;
-    config3.waveCount = 1;
-
+/*
+ * Code taken from example on D3 Liquid Fill Gauge example by Bratton.
+*/
 function liquidFillGaugeDefaultSettings(){
     return {
         minValue: 0, // The gauge minimum value.

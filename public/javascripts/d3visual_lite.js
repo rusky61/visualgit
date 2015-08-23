@@ -1,7 +1,11 @@
 var coin = 2;
-localStorage.setItem('coins', 'ltc');
-var x = localStorage.getItem('coins');
-
+//localStorage.setItem('coins', 'ltc');
+//var x = localStorage.getItem('coins');
+/*
+ *For inline text descriptions see d3visual.js 
+ *Code at end shows using websocket packege and reconnet. changed to primus.
+ *
+ */
 
 
 

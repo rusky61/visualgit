@@ -1,6 +1,6 @@
-//var x = localStorage.getItem('coins');
+
 var coin = 1;
-//localStorage.setItem('coins', "btc");
+
 
 
 var data = {
@@ -95,10 +95,13 @@ var s = 0;
 var t = 1;
 var started = 0;
 
-
+/*
+ *Main function that pushes latest 100 blocks received from Pi and also from external websocket api + updates visualisation.
+ *Start source on 0 and target on 1 then increment. links nodes to the previous one. if orphans then would need to be changed.
+ */
 
 function updateBlock(nodes){
-    data.nodes.push({"x":10, "y":10, "height":nodes.height, "hash": nodes.hash, "branch":nodes.branch, "previous_block_hash": nodes.previous_block_hash, "reward": nodes.reward, 'confirmations': nodes.confirmations, 'merkle_root': nodes.merkle_root, 'time': nodes.time, 'nonce':nodes.nonce, 'bits':nodes.bits, 'difficulty':nodes.difficulty, 'reward':nodes.reward, 'fees':nodes.fees, 'total_out':nodes.total_out, 'size':nodes.size, 'transactions_count':nodes.transactions_count, });
+    data.nodes.push({"x":10, "y":10, "height":nodes.height, "hash": nodes.hash, "branch":nodes.branch, "previous_block_hash": nodes.previous_block_hash, 'confirmations': nodes.confirmations, 'merkle_root': nodes.merkle_root, 'time': nodes.time, 'nonce':nodes.nonce, 'bits':nodes.bits, 'difficulty':nodes.difficulty, 'reward':nodes.reward, 'fees':nodes.fees, 'total_out':nodes.total_out, 'size':nodes.size, 'transactions_count':nodes.transactions_count, });
      if (data.nodes.length > 1){
 	data.links.push({"source":s++,"target":t++});
      }
@@ -126,7 +129,7 @@ function updateBlock(nodes){
 	var matrix = this.getScreenCTM()
 	.translate(+this.getAttribute("cx"),
 		   +this.getAttribute("cy"));
-   */
+        */
 	  
     div.transition()       
         .duration(500)
@@ -139,23 +142,21 @@ function updateBlock(nodes){
 	.style("top",
 	       (d.y +"px"));
 	})
-	   
-	   
-	   
-	   
-	   
+	    
         .on('dblclick', function (d){window.open('https://blockchain.info/block/'+d.hash)})
 	.on("mouseout", function (d) {
 		
-		hideTooltip.call(this, d);
-                resizeCoin.call(this, d);})
+	     hideTooltip.call(this, d);
+             resizeCoin.call(this, d);})
         .call(force.drag);
      
        	
        force.start();
 
 }
-
+/*
+ *Updates table on mouseover event.
+ */
 
 function tableUpdate(d) {
 	 d3.select(this).transition()
@@ -326,6 +327,13 @@ socketbtc.on('error', function error(err){
 console.error('error = ', err, err.message);
 });
 
+/*
+ * Create primus object to open connection with Pi and recieve latest 100 blocks.
+ *  client tells pi that it wants bitcoin JSON.
+ *  firstTableUpdate function  updates table with block data.
+ */
+
+
 var primus = Primus.connect();
 
 
@@ -357,12 +365,19 @@ primus.on('disconnection', function (spark) {
 	console.log("disconnected");
 });
   
+/*
+ *Show  notification while page loads (e.g. please wait blocks loading)
+ */
+
 function show(){
 //alert("new block")
 $('#areatext').show()
 setTimeout(function() {$("#areatext").fadeOut();}, 10000);
 }
-
+/*
+ *close current socket when user clicks on another coin to view (e.g. Dogecoin, Litecoin)
+ *
+ */
 function closesocket(coin) {
 	if(coin == 1){
 	socketbtc.end()
