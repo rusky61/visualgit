@@ -1,14 +1,9 @@
-
 var coin = 1;
 
-
-
 var data = {
-	           "nodes":[
-		   ],
-		   "links":[
-		   ]
-    };
+    "nodes":[],
+	"links":[]
+};
 
 
 var elmnt = document.getElementById("area2");
@@ -22,10 +17,10 @@ var coinSize = 40;
 var t0 = Date.now();
 
 
- var div = d3.selectAll("#area2").append("div")
+var div = d3.selectAll("#area2").append("div")
  //	.selectAll("image")   
 	.attr("class", "tooltip")               
-        .style("opacity", 0);
+    .style("opacity", 0);
 
 show();
 
@@ -102,22 +97,24 @@ var started = 0;
 
 function updateBlock(nodes){
     data.nodes.push({"x":10, "y":10, "height":nodes.height, "hash": nodes.hash, "branch":nodes.branch, "previous_block_hash": nodes.previous_block_hash, 'confirmations': nodes.confirmations, 'merkle_root': nodes.merkle_root, 'time': nodes.time, 'nonce':nodes.nonce, 'bits':nodes.bits, 'difficulty':nodes.difficulty, 'reward':nodes.reward, 'fees':nodes.fees, 'total_out':nodes.total_out, 'size':nodes.size, 'transactions_count':nodes.transactions_count, });
-     if (data.nodes.length > 1){
-	data.links.push({"source":s++,"target":t++});
-     }
+    
+    if (data.nodes.length > 1){
+		data.links.push({"source":s++,"target":t++});
+    }
     
     link = link.data(data.links);
     link.enter().insert("line", "image")   
-    .attr("class", "link");
+    	.attr("class", "link");
       
     force.linkStrength(function(d,i) {
-        if (d.target.index == s) return 0.01;
-        return 1; })
+    	if (d.target.index == s) return 0.01;
+    	return 1; 
+    })
 
     node = node.data(data.nodes);
 
     node.enter().insert("image")
-    .attr("xlink:href", "/images/Bitcoin.png")
+    	.attr("xlink:href", "/images/Bitcoin.png")
         .attr("width", coinSize)//diameter
         .attr("height", coinSize)
         .attr("x",-(coinSize/2))
@@ -137,21 +134,16 @@ function updateBlock(nodes){
     div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")        
 //	.style('top', (d3.event.pageY - 100) + 'px')	
 //	.style('left',(d3.event.pageX - 390) + 'px');
-	.style("left",
-	       (d.x + 50 + "px"))
-	.style("top",
-	       (d.y +"px"));
-	})
-	    
-        .on('dblclick', function (d){window.open('https://blockchain.info/block/'+d.hash)})
+		.style("left",(d.x + 50 + "px"))
+		.style("top",(d.y +"px"));
+	})	    
+    .on('dblclick', function (d){window.open('https://blockchain.info/block/'+d.hash)})
 	.on("mouseout", function (d) {
 		
-	     hideTooltip.call(this, d);
-             resizeCoin.call(this, d);})
-        .call(force.drag);
-     
-       	
-       force.start();
+	hideTooltip.call(this, d);
+    resizeCoin.call(this, d);})
+    	.call(force.drag);
+    force.start();
 
 }
 /*
@@ -279,13 +271,11 @@ window.addEventListener("resize", resize);
 *Easier to have jquery event listener for scrolling. works better but still not convinced this is correct;
 */
 $(window).scroll(function(){
-height = $(window).scrollTop()+$(window).height();	
-if($(window).scrollTop() + $(window).height() < $(document).height()-20){
-	
-svgContainer.attr("width",width).attr("height", height);
-
-}
-force.size([width, height]).resume();
+	height = $(window).scrollTop()+$(window).height();	
+	if($(window).scrollTop() + $(window).height() < $(document).height()-20){
+		svgContainer.attr("width",width).attr("height", height);
+	}
+	force.size([width, height]).resume();
 
 });
 
@@ -305,26 +295,26 @@ function resize() {
  */
 
 var socketbtc = Primus.connect('wss://bitcoin.toshi.io');
-socketbtc.on('open', function(){
-socketbtc.write({'subscribe':'blocks'});
-console.log('message sent');
+	socketbtc.on('open', function(){
+	socketbtc.write({'subscribe':'blocks'});
+	console.log('message sent');
 });
 
 socketbtc.on('data', function incoming(evt){
 
-var block = evt.data;
-console.log('rcvd new btc'+ JSON.stringify(evt));
+	var block = evt.data;
+	console.log('rcvd new btc'+ JSON.stringify(evt));
 
-updateBlock(block);
-triggerTime('btc');
+	updateBlock(block);
+	triggerTime('btc');
 });
 
 socketbtc.on('reconnecting', function(opts){
-console.log('reconnecting', opts.timeout);
+	console.log('reconnecting', opts.timeout);
 });
 
 socketbtc.on('error', function error(err){
-console.error('error = ', err, err.message);
+	console.error('error = ', err, err.message);
 });
 
 /*
@@ -339,7 +329,8 @@ var primus = Primus.connect();
 
 primus.on("open", function (){
       console.log('connected');
-      primus.write('bitcoin');
+      var lastHeight = data.nodes.length > 0 ? data.nodes[data.nodes.length-1].height : -1
+      primus.write({'coin':'bitcoin','height': lastHeight});
 });
 
 
@@ -370,9 +361,11 @@ primus.on('disconnection', function (spark) {
  */
 
 function show(){
-//alert("new block")
-$('#areatext').show()
-setTimeout(function() {$("#areatext").fadeOut();}, 10000);
+	//alert("new block")
+	$('#areatext').show()
+	setTimeout(function() {
+		$("#areatext").fadeOut();
+	}, 10000);
 }
 /*
  *close current socket when user clicks on another coin to view (e.g. Dogecoin, Litecoin)
@@ -380,13 +373,13 @@ setTimeout(function() {$("#areatext").fadeOut();}, 10000);
  */
 function closesocket(coin) {
 	if(coin == 1){
-	socketbtc.end()
-	console.log('bitcoin socket closed');
+		socketbtc.end()
+		console.log('bitcoin socket closed');
 	} else if (coin == 2) {
-	socket.end();	
+		socket.end();	
         console.log('litecoin socket closed');
 	} else if (coin == 3) {
-	socketdoge.end();
-	console.log('dogecoin socket closed');
+		socketdoge.end();
+		console.log('dogecoin socket closed');
 	}
 }

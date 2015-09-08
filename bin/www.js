@@ -8,11 +8,12 @@
 var app = require('../app');
 var debug = require('debug')('visualapp:server');
 var fs = require("fs");
+var _ = require('lodash-node');
 var hitcounter = 0;
 /**
  * Get port from environment and it store in Express.
  */
-var hit = 0;
+var clients = 0;
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
@@ -30,6 +31,14 @@ var primus = new Primus(server, {transformer : 'websockets', parser : 'JSON'});
 //var Emitter = require ('primus-emitter');
 //primus.use('emitter', Emitter); 
 
+function initializeData(store) {
+	console.log('Initializing data for '+store);
+	var data = fs.readFileSync(__dirname +'/'+store+'.json','utf8');
+	return JSON.parse(data);
+}
+var btc = initializeData('btc');
+var ltc = initializeData('ltc');
+var doge = initializeData('doge');
 
 server.listen(3000);
 
@@ -118,39 +127,33 @@ primus.on('connection', function(spark) {
 */
 
 primus.on('connection', function(socket)  {
-hit++;	
-	//console.log('connection was from ', spark.address)
-/*	
-	spark.write('welcome')
-	var data = fs.readFileSync(__dirname +'/data1.json','utf8');
-	//console.log('file',data);
-	obj = JSON.parse(data);
-	spark.write(obj);
-	spark.on('data', function (data) {
-         console.log('received data from the client', data);
-	*/
-	// });
-	console.log('new connection & hit number :'+hit);
+	clients++;	
+	console.log('new connection from '+socket.address.ip+' & concurrent clients number :'+clients);
 	socket.on('data', function(msg){
-	console.log('messgae received  ', msg);
-	if(msg =='bitcoin'){
-        var data = fs.readFileSync(__dirname +'/data.json','utf8');
-	obj = JSON.parse(data);
-	socket.write(obj);	
-	} else if (msg == 'litecoin'){
-        var data = fs.readFileSync(__dirname +'/data1.json','utf8');
-	obj = JSON.parse(data);
-	socket.write(obj);
-	} else if (msg == 'dogecoin'){
-	var data = fs.readFileSync(__dirname +'/data2.json','utf8');
-	obj = JSON.parse(data);
-	socket.write(obj);
-	}
-});
-
+		console.log('messgae received  ', msg);
+		if(msg.coin =='bitcoin'){
+	        /*var data = fs.readFileSync(__dirname +'/data.json','utf8');
+			obj = JSON.parse(data);*/
+			var index = _.findIndex(btc, function(el) {
+  				return el.height == msg.height;
+			});
+			var part = btc;
+			if (index > -1){
+				part = _.slice(btc, ++index);
+			}
+			socket.write(part);
+		} else if (msg == 'litecoin'){
+	        /*var data = fs.readFileSync(__dirname +'/data1.json','utf8');
+			obj = JSON.parse(data);*/
+			socket.write(ltc);
+		} else if (msg == 'dogecoin'){
+			/*var data = fs.readFileSync(__dirname +'/data2.json','utf8');
+			obj = JSON.parse(data);*/
+			socket.write(doge);
+		}
+	});
 	
 });
-//	fs.createReadStream(__dirname + '/data.json', { encoding: 'utf8'}).pipe(spark);
 
 
 
@@ -161,35 +164,5 @@ primus.on('end', function () {
 primus.on('disconnection', function (spark) {
 	// the spark that disconnect
 	console.log('Connection closed',spark.address);
+	clients--;
 });
-
-/*
-fs.watchFile(__dirname + '/latestblock.json', function (curr, prev) {
-	console.log('processing data.json' + curr.mtime);
-	console.log('the previous mtime was: ' + prev.mtime);
-	
-	if(curr.size != prev.size){
-	//console.log('sending:',[data[data.length-1]]);
-	//primus.write('new block');
-	//spark.write([data[data.length-1]]);
-	primus.forEach(function (spark, id, connections) {
-		
-
-		        console.log('spark', spark);
-		//var data = require(__dirname +'/data.json');
-		        fs.readFile('/home/pi/visual/visualapp/bin/latestblock.json', 'utf8', function (err ,data){		
-			if(err) throw err;
-			obj = JSON.parse(data);
-			
-		
-		        spark.write([obj]);
-		        //console.log('broadcast',[data[data.length-1]]);
-		        console.log("broadcast", obj);
-		        //spark.write([data[data.length-1]]);
-		
-		});
-	
-		});
-	}
-})
-*/
