@@ -1,5 +1,3 @@
-var coin = 1;
-
 var data = {
     "nodes":[],
 	"links":[]
@@ -22,46 +20,58 @@ var div = d3.selectAll("#area2").append("div")
 	.attr("class", "tooltip")               
     .style("opacity", 0);
 
-show();
+//show();
 
 /*
  * Step 3: D3 force layout setup. Create force layout object and define the properties.
 */
-var force = d3.layout.force()
-    .gravity(0.01)
-    .charge(-30)
-    .linkDistance(60)
-    .nodes(data.nodes)
-    .links(data.links)
+var force;
    // .size([w, h])
    // .start()
    
 /*
  *Step 2: Select the DOM element area2 and append an SVG element to it that will be used for the visualisation.
  */ 
-var svgContainer = d3.select("#area2").append("svg")	  
+var svgContainer = d3.select("#area2").append("svg"); 
 
 /*
  *Step 4: Add links to the visualisation. attr() used to set HTML attributes.
  */
-var link = svgContainer.selectAll(".link")
-    .data(data.links)
-    .enter().append("line")
-    .attr("class", "link");
+var link;
 
 /*
  *Step 4: Add nodes to the visualisation. attr() used to set HTML attributes. e.g. append bitcoin image.set width, height, radius
  */
-var node = svgContainer.selectAll("image")
-    .data(data.nodes)
-    .enter().append("image")
-    .attr("xlink:href", "/images/Bitcoin.png")
-    .attr("width", coinSize)//diameter
-    .attr("height", coinSize)
-    .attr("r", radius - .75)
-    .attr("x",-20)
-    .attr("y",-20)
-    .call(force.drag);
+var node;
+
+function initD3Objects(){
+	force = d3.layout.force()
+	    .gravity(0.01)
+	    .charge(-30)
+	    .linkDistance(60)
+	    .nodes(data.nodes)
+	    .links(data.links);
+
+	node = svgContainer.selectAll("image")
+	    .data(data.nodes)
+	    .enter().append("image")
+	    .attr("xlink:href", "/images/Bitcoin.png")
+	    .attr("width", coinSize)//diameter
+	    .attr("height", coinSize)
+	    .attr("r", radius - .75)
+	    .attr("x",-20)
+	    .attr("y",-20)
+	    .call(force.drag);
+
+    link = svgContainer.selectAll(".link")
+	    .data(data.links)
+	    .enter().append("line")
+	    .attr("class", "link");
+
+}
+
+initD3Objects();
+
 /*
  *.call(force.drag) used to allow interactive dragging when a user selects a node.
  */
@@ -83,7 +93,6 @@ force.on("tick", function() {
 	    .attr("y2", function(d) { return d.target.y; });
 
 	node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
-	force.start();	
 });
 
 var s = 0;
@@ -96,6 +105,8 @@ var started = 0;
  */
 
 function updateBlock(nodes){
+	if (nodes === undefined) return;
+
     data.nodes.push({"x":10, "y":10, "height":nodes.height, "hash": nodes.hash, "branch":nodes.branch, "previous_block_hash": nodes.previous_block_hash, 'confirmations': nodes.confirmations, 'merkle_root': nodes.merkle_root, 'time': nodes.time, 'nonce':nodes.nonce, 'bits':nodes.bits, 'difficulty':nodes.difficulty, 'reward':nodes.reward, 'fees':nodes.fees, 'total_out':nodes.total_out, 'size':nodes.size, 'transactions_count':nodes.transactions_count, });
     
     if (data.nodes.length > 1){
@@ -121,30 +132,30 @@ function updateBlock(nodes){
         .attr("y",-(coinSize/2))
 	
         .on("mouseover", tableUpdate)
-        .on('mousemove', function(d){
-	/*
-	var matrix = this.getScreenCTM()
-	.translate(+this.getAttribute("cx"),
-		   +this.getAttribute("cy"));
-        */
-	  
-    div.transition()       
-        .duration(500)
-        .style("opacity", 1); 
-    div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")        
-//	.style('top', (d3.event.pageY - 100) + 'px')	
-//	.style('left',(d3.event.pageX - 390) + 'px');
+        .on('mousemove', coinOnMouseMove)
+    	.on('dblclick', coinOnMouseDbClick)
+		.on("mouseout", coinOnMouseOut)
+    	.call(force.drag);
+    
+    force.start();
+}
+
+function coinOnMouseOut (d) {
+	hideTooltip.call(this, d);
+	resizeCoin.call(this, d);
+}
+
+function coinOnMouseDbClick(d){
+	window.open('https://blockchain.info/block/'+d.hash)
+}
+
+function coinOnMouseMove(d){
+	div.transition()       
+		.duration(500)
+		.style("opacity", 1); 
+	div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")
 		.style("left",(d.x + 50 + "px"))
 		.style("top",(d.y +"px"));
-	})	    
-    .on('dblclick', function (d){window.open('https://blockchain.info/block/'+d.hash)})
-	.on("mouseout", function (d) {
-		
-	hideTooltip.call(this, d);
-    resizeCoin.call(this, d);})
-    	.call(force.drag);
-    force.start();
-
 }
 /*
  *Updates table on mouseover event.
@@ -339,12 +350,11 @@ primus.on("open", function (){
 //});
 primus.on("data", function incoming(data){
 
-	console.log("new data incoming", data); 
+	console.log("new data incoming: ", data); 
 
 	for (i = 0; i < data.length; i++) { 
 		updateBlock(data[i]);
-						
-		}
+	}
 	latestBlock(firstTableUpdate)
 	triggerTime('btc'); 
 });
@@ -355,6 +365,17 @@ primus.on('disconnection', function (spark) {
 	// the spark that disconnected
 	console.log("disconnected");
 });
+
+function reloadBlocks(coin){
+	data.nodes.length = 0;
+	data.links.length = 0;
+	svgContainer.selectAll(".link").remove();
+	svgContainer.selectAll("image").remove();
+	s = 0;
+	t = 1;
+	primus.write({'coin':coin,'height': -1})
+
+}
   
 /*
  *Show  notification while page loads (e.g. please wait blocks loading)

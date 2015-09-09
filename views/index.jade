@@ -240,13 +240,12 @@ html(lang="en")
  script.
   $(document).ready(function(){
     $('#lite').click(function(){
-      $('#area2').empty();
+      //$('#area2').empty();
       $('#litecoincirc').show();
       $('#bitcoincirc').hide();
       $('#dogecoincirc').hide();
-      primus.end();
-      $.getScript('/javascripts/d3visual_lite.js');
-      closesocket(coin);
+      reloadBlocks('litecoin');
+      //closesocket(coin);
       triggerTime(coin);
       console.log('socket '+coin+' closed');
     });
@@ -255,13 +254,12 @@ html(lang="en")
  script.
    $(document).ready(function(){
     $('#bit').click(function(){
-      $('#area2').empty();
+      //$('#area2').empty();
       $('#bitcoincirc').show();
       $('#litecoincirc').hide();
       $('#dogecoincirc').hide();
-      primus.end();
-      $.getScript('/javascripts/d3visual.js');
-      closesocket(coin);
+      reloadBlocks('bitcoin');
+      //closesocket(coin);
       triggerTime (coin);
       console.log('socket '+coin+' closed');
     });
@@ -273,11 +271,10 @@ html(lang="en")
         $('#dogecoincirc').show();
         $('#litecoincirc').hide();
         $('#bitcoincirc').hide();
-        primus.end();
-        $.getScript('/javascripts/d3visual_doge.js')
-         closesocket(coin);
-         triggerTime (coin);
-         console.log('socket '+coin+' closed');
+        reloadBlocks('dogecoin');
+        closesocket(coin);
+        triggerTime (coin);
+        console.log('socket '+coin+' closed');
           
       });
    });

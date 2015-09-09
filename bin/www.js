@@ -62,30 +62,30 @@ function normalizePort(val) {
   return false;
 }
 
+function getBlocksData(coin, height){
+	var index = _.findIndex(coin, function(el) {
+			return el.height == parseInt(height);
+	});
+	var part = coin;
+	if (index > -1){
+		part = _.slice(coin, ++index);
+	}
+	return part;
+}
+
 primus.on('connection', function(socket)  {
 	clients++;	
 	debug('new connection from %s & concurrent clients number :%d',socket.address.ip, clients);
 	socket.on('data', function(msg){
 		debug('messgae received: %j', msg);
-		if(msg.coin =='bitcoin'){
-	        /*var data = fs.readFileSync(__dirname +'/data.json','utf8');
-			obj = JSON.parse(data);*/
-			var index = _.findIndex(btc, function(el) {
-  				return el.height == msg.height;
-			});
-			var part = btc;
-			if (index > -1){
-				part = _.slice(btc, ++index);
-			}
-			socket.write(part);
-		} else if (msg == 'litecoin'){
-	        /*var data = fs.readFileSync(__dirname +'/data1.json','utf8');
-			obj = JSON.parse(data);*/
-			socket.write(ltc);
-		} else if (msg == 'dogecoin'){
-			/*var data = fs.readFileSync(__dirname +'/data2.json','utf8');
-			obj = JSON.parse(data);*/
-			socket.write(doge);
+		//TODO: validate msg format
+		if(msg.coin ==='bitcoin'){
+			socket.write(getBlocksData(btc,msg.height));
+		} else if (msg.coin === 'litecoin'){
+			//debug('%j',getBlocksData(ltc,msg.height));
+			socket.write(getBlocksData(ltc,msg.height));
+		} else if (msg.coin === 'dogecoin'){
+			socket.write(getBlocksData(doge,msg.height));
 		}
 	});
 	
