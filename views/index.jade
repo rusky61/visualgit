@@ -232,51 +232,52 @@ html(lang="en")
   
  script.
    $(document).ready(function(){
-   $('[data-toggle="popover"]').popover({ trigger: "hover"   
-   });
+     $('[data-toggle="popover"]').popover({ 
+      trigger: "hover"   
+     });
    });
  
  script.
-   $(document).ready(function(){
-   $('#lite').click(function(){
-   $('#area2').empty();
-   $ ('#litecoincirc').show();
-   $ ('#bitcoincirc').hide();
-   $ ('#dogecoincirc').hide();
-     
-   $.getScript('/javascripts/d3visual_lite.js')
-     
-     closesocket(coin);
-     triggerTime (coin);
-     console.log('socket '+coin+' closed');
-     
-   });
-   });
+  $(document).ready(function(){
+    $('#lite').click(function(){
+      $('#area2').empty();
+      $('#litecoincirc').show();
+      $('#bitcoincirc').hide();
+      $('#dogecoincirc').hide();
+      primus.end();
+      $.getScript('/javascripts/d3visual_lite.js');
+      closesocket(coin);
+      triggerTime(coin);
+      console.log('socket '+coin+' closed');
+    });
+  });
+ 
  script.
    $(document).ready(function(){
-   $('#bit').click(function(){
-   $('#area2').empty();
-   $('#bitcoincirc').show();
-   $('#litecoincirc').hide();
-   $('#dogecoincirc').hide();
-   $.getScript('/javascripts/d3visual.js')
-     
-     closesocket(coin);
-     triggerTime (coin);
-     console.log('socket '+coin+' closed');
-   });
+    $('#bit').click(function(){
+      $('#area2').empty();
+      $('#bitcoincirc').show();
+      $('#litecoincirc').hide();
+      $('#dogecoincirc').hide();
+      primus.end();
+      $.getScript('/javascripts/d3visual.js');
+      closesocket(coin);
+      triggerTime (coin);
+      console.log('socket '+coin+' closed');
+    });
    });  
  script.
    $(document).ready(function(){
-   $('#doge').click(function(){
-   $('#area2').empty();
-   $('#dogecoincirc').show();
-   $('#litecoincirc').hide();
-   $('#bitcoincirc').hide();
-   $.getScript('/javascripts/d3visual_doge.js')
-     closesocket(coin);
-     triggerTime (coin);
-     console.log('socket '+coin+' closed');
-      
-   });
+     $('#doge').click(function(){
+        $('#area2').empty();
+        $('#dogecoincirc').show();
+        $('#litecoincirc').hide();
+        $('#bitcoincirc').hide();
+        primus.end();
+        $.getScript('/javascripts/d3visual_doge.js')
+         closesocket(coin);
+         triggerTime (coin);
+         console.log('socket '+coin+' closed');
+          
+      });
    });
