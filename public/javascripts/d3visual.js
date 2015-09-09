@@ -9,7 +9,6 @@ var data = {
 var t0 = Date.now();
 var s = 0;
 var t = 1;
-var started = 0;
 var currentCoin = "btc";
 
 var coins = {
@@ -56,13 +55,13 @@ function initD3Objects(){
 	d.node = d.svgContainer.selectAll("image")
 	    .data(data.nodes)
 	    .enter().append("image")
-	    .attr("xlink:href", "/images/Bitcoin.png")
+	    .attr("xlink:href", coins[currentCoin].img)
 	    .attr("width", d.coinSize)//diameter
 	    .attr("height", d.coinSize)
 	    .attr("r", d.radius - .75)
 	    .attr("x",-20)
-	    .attr("y",-20)
-	    .call(d.force.drag);
+	    .attr("y",-20);
+	    //.call(d.force.drag);
 
     d.link = d.svgContainer.selectAll(".link")
 	    .data(data.links)
@@ -97,6 +96,22 @@ d.force.on("tick", function() {
 });
 
 
+/*
+It not possible to change strenght during animation :(
+function scheduleStrengthReset(){
+	if (scheduleStrengthReset.scheduled === undefined){
+		console.log('scheduleStrengthReset set');
+		setTimeout(function() {
+			d.force.stop();
+			d.force.linkStrength(1);
+	    	d.force.start();
+	    	console.log('scheduleStrengthReset executed');
+	    	delete scheduleStrengthReset.scheduled;
+		}, 2000); 
+		scheduleStrengthReset.scheduled = true;
+	}
+}*/
+
 
 /*
  *Main function that pushes latest 100 blocks received from Pi and also from external websocket api + updates visualisation.
@@ -119,7 +134,7 @@ function updateBlock(nodes){
     d.force.linkStrength(function(d,i) {
     	if (d.target.index == s) return 0.01;
     	return 1; 
-    })
+    });
 
     d.node = d.node.data(data.nodes);
 
@@ -137,6 +152,7 @@ function updateBlock(nodes){
     	.call(d.force.drag);
     
     d.force.start();
+    //scheduleStrengthReset();
 }
 
 function coinOnMouseOut (el) {
