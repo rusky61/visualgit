@@ -3,67 +3,68 @@ var data = {
 	"links":[]
 };
 
-
-var elmnt = document.getElementById("area2");
-        
 /*
  *Global variables
  */
-var radius = 6;
-  
-var coinSize = 40;
 var t0 = Date.now();
+var s = 0;
+var t = 1;
+var started = 0;
+var currentCoin = "btc";
 
+var coins = {
+	btc : {fullname:'bitcoin',img:"/images/Bitcoin.png"},
+	ltc : {fullname:'litecoin',img:"/images/Litecoin.png"},
+	doge: {fullname:'dogecoin',img:"/images/dogecoin.png"},
+}
 
-var div = d3.selectAll("#area2").append("div")
- //	.selectAll("image")   
-	.attr("class", "tooltip")               
-    .style("opacity", 0);
-
-//show();
+var d = new function(){
+	this.elmnt = document.getElementById("area2");
+	this.div = d3.selectAll("#area2").append("div")
+ 		.attr("class", "tooltip")               
+	    .style("opacity", 0);
+	this.force;
+	this.link;
+	this.node;
+	this.svgContainer = d3.select("#area2").append("svg"); 
+	this.coinSize = 40;
+	this.radius = 6
+}
 
 /*
  * Step 3: D3 force layout setup. Create force layout object and define the properties.
 */
-var force;
-   // .size([w, h])
-   // .start()
    
 /*
  *Step 2: Select the DOM element area2 and append an SVG element to it that will be used for the visualisation.
  */ 
-var svgContainer = d3.select("#area2").append("svg"); 
-
 /*
  *Step 4: Add links to the visualisation. attr() used to set HTML attributes.
  */
-var link;
-
 /*
  *Step 4: Add nodes to the visualisation. attr() used to set HTML attributes. e.g. append bitcoin image.set width, height, radius
  */
-var node;
 
 function initD3Objects(){
-	force = d3.layout.force()
+	d.force = d3.layout.force()
 	    .gravity(0.01)
 	    .charge(-30)
 	    .linkDistance(60)
 	    .nodes(data.nodes)
 	    .links(data.links);
 
-	node = svgContainer.selectAll("image")
+	d.node = d.svgContainer.selectAll("image")
 	    .data(data.nodes)
 	    .enter().append("image")
 	    .attr("xlink:href", "/images/Bitcoin.png")
-	    .attr("width", coinSize)//diameter
-	    .attr("height", coinSize)
-	    .attr("r", radius - .75)
+	    .attr("width", d.coinSize)//diameter
+	    .attr("height", d.coinSize)
+	    .attr("r", d.radius - .75)
 	    .attr("x",-20)
 	    .attr("y",-20)
-	    .call(force.drag);
+	    .call(d.force.drag);
 
-    link = svgContainer.selectAll(".link")
+    d.link = d.svgContainer.selectAll(".link")
 	    .data(data.links)
 	    .enter().append("line")
 	    .attr("class", "link");
@@ -82,22 +83,20 @@ initD3Objects();
  * Also updates positions of the links.
  */
 
-force.on("tick", function() {
+d.force.on("tick", function() {
 
-	node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
+	d.node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
     		.attr("cy", function(d) { return d.y = Math.max(15, Math.min(height - 15, d.y)); });
 
-	link.attr("x1", function(d) { return d.source.x; })
+	d.link.attr("x1", function(d) { return d.source.x; })
 	    .attr("y1", function(d) { return d.source.y; })
 	    .attr("x2", function(d) { return d.target.x; })
 	    .attr("y2", function(d) { return d.target.y; });
 
-	node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
+	d.node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
 });
 
-var s = 0;
-var t = 1;
-var started = 0;
+
 
 /*
  *Main function that pushes latest 100 blocks received from Pi and also from external websocket api + updates visualisation.
@@ -113,90 +112,90 @@ function updateBlock(nodes){
 		data.links.push({"source":s++,"target":t++});
     }
     
-    link = link.data(data.links);
-    link.enter().insert("line", "image")   
+    d.link = d.link.data(data.links);
+    d.link.enter().insert("line", "image")   
     	.attr("class", "link");
       
-    force.linkStrength(function(d,i) {
+    d.force.linkStrength(function(d,i) {
     	if (d.target.index == s) return 0.01;
     	return 1; 
     })
 
-    node = node.data(data.nodes);
+    d.node = d.node.data(data.nodes);
 
-    node.enter().insert("image")
-    	.attr("xlink:href", "/images/Bitcoin.png")
-        .attr("width", coinSize)//diameter
-        .attr("height", coinSize)
-        .attr("x",-(coinSize/2))
-        .attr("y",-(coinSize/2))
+    d.node.enter().insert("image")
+    	.attr("xlink:href", coins[currentCoin].img)
+        .attr("width", d.coinSize)//diameter
+        .attr("height", d.coinSize)
+        .attr("x",-(d.coinSize/2))
+        .attr("y",-(d.coinSize/2))
 	
         .on("mouseover", tableUpdate)
         .on('mousemove', coinOnMouseMove)
     	.on('dblclick', coinOnMouseDbClick)
 		.on("mouseout", coinOnMouseOut)
-    	.call(force.drag);
+    	.call(d.force.drag);
     
-    force.start();
+    d.force.start();
 }
 
-function coinOnMouseOut (d) {
-	hideTooltip.call(this, d);
-	resizeCoin.call(this, d);
+function coinOnMouseOut (el) {
+	hideTooltip.call(this, el);
+	resizeCoin.call(this, el);
 }
 
-function coinOnMouseDbClick(d){
-	window.open('https://blockchain.info/block/'+d.hash)
+function coinOnMouseDbClick(el){
+	window.open('https://blockchain.info/block/'+el.hash)
 }
 
-function coinOnMouseMove(d){
-	div.transition()       
+function coinOnMouseMove(el){
+	d.div.transition()       
 		.duration(500)
 		.style("opacity", 1); 
-	div.html("Block Number "+d.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + d.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")
-		.style("left",(d.x + 50 + "px"))
-		.style("top",(d.y +"px"));
+	d.div.html("Block Number "+el.height +"</br>"  + "Number of transations in block: " + "<span style='color:red; font-size:20px'>" + el.transactions_count + "</span>"+"</br>"+ "dbl click me for more info")
+		.style("left",(el.x + 50 + "px"))
+		.style("top",(el.y +"px"));
 }
 /*
  *Updates table on mouseover event.
  */
 
-function tableUpdate(d) {
+function tableUpdate(el) {
 	 d3.select(this).transition()
         .duration(50)
-        .attr("width", coinSize + 10)
-	.attr("height", coinSize + 10);
+        .attr("width", d.coinSize + 10)
+		.attr("height", d.coinSize + 10);
    
 	d3.select("#datapoint1")
-	   .html(d.height);
+	   .html(el.height);
 	d3.select("#datapoint2")
-	   .html(d.transactions_count);
+	   .html(el.transactions_count);
 	d3.select("#datapoint3")
-	   .html(d.previous_block_hash);
+	   .html(el.previous_block_hash);
 	d3.select("#datapoint4")
-   	    .html(d.hash);
+   	    .html(el.hash);
 	d3.select("#datapoint5")
-	   .html(d.confirmations);
+	   .html(el.confirmations);
 	d3.select("#datapoint6")
-	   .html(d.merkle_root);
+	   .html(el.merkle_root);
 	d3.select("#datapoint7")
-	   .html(d.time);
+	   .html(el.time);
 	d3.select("#datapoint8")
-	   .html(d.created_at);
+	   .html(el.created_at);
 	d3.select("#datapoint9")
-	   .html(d.nonce);
+	   .html(el.nonce);
 	d3.select("#datapoint10")
-	   .html(d.bits);
+	   .html(el.bits);
 	d3.select("#datapoint11")
-	   .html(d.difficulty);
+	   .html(el.difficulty);
 	d3.select("#datapoint12")
-	   .html(d.reward);
+	   .html(el.reward);
 	d3.select("#datapoint13")
-	   .html(d.fees);
+	   .html(el.fees);
 	d3.select("#datapoint14")
-	   .html(d.total_out);
+	   .html(el.total_out);
 	d3.select("#datapoint15")
-	   .html(d.size);
+	   .html(el.size);
 	//d3.select("#datapoint16")
 	  // .html(d.branch);
 	//showToolTip(d);
@@ -258,15 +257,15 @@ var last = data.nodes.slice(-1)[0];
 function resizeCoin(){
     d3.select(this).transition()
         .duration(50)
-        .attr("width", coinSize)
-        .attr("height", coinSize);
+        .attr("width", d.coinSize)
+        .attr("height", d.coinSize);
 }
 	
-function hideTooltip(d){
+function hideTooltip(el){
     d3.select(this)
         .transition()
         .duration(50)
-    div.transition()       
+    d.div.transition()       
         .duration(1500)       
         .style("opacity", 0);  
 }
@@ -284,9 +283,9 @@ window.addEventListener("resize", resize);
 $(window).scroll(function(){
 	height = $(window).scrollTop()+$(window).height();	
 	if($(window).scrollTop() + $(window).height() < $(document).height()-20){
-		svgContainer.attr("width",width).attr("height", height);
+		d.svgContainer.attr("width",width).attr("height", height);
 	}
-	force.size([width, height]).resume();
+	d.force.size([width, height]).resume();
 
 });
 
@@ -296,9 +295,9 @@ $(window).scroll(function(){
  */
 function resize() {
 
-	width = elmnt.offsetWidth, height = window.innerHeight + window.pageYOffset;
- 	svgContainer.attr("width", width).attr("height", height);
- 	force.size([width, height]).resume();
+	width = d.elmnt.offsetWidth, height = window.innerHeight + window.pageYOffset;
+ 	d.svgContainer.attr("width", width).attr("height", height);
+ 	d.force.size([width, height]).resume();
 }
 /*
  *Step 6: websocket to bitcoin.toshi to fetch most recent block.
@@ -341,7 +340,7 @@ var primus = Primus.connect();
 primus.on("open", function (){
       console.log('connected');
       var lastHeight = data.nodes.length > 0 ? data.nodes[data.nodes.length-1].height : -1
-      primus.write({'coin':'bitcoin','height': lastHeight});
+      primus.write({'coin':coins[currentCoin].fullname,'height': lastHeight});
 });
 
 
@@ -366,14 +365,15 @@ primus.on('disconnection', function (spark) {
 	console.log("disconnected");
 });
 
-function reloadBlocks(coin){
+function reloadBlocks(coinName){
 	data.nodes.length = 0;
 	data.links.length = 0;
-	svgContainer.selectAll(".link").remove();
-	svgContainer.selectAll("image").remove();
+	d.svgContainer.selectAll(".link").remove();
+	d.svgContainer.selectAll("image").remove();
 	s = 0;
 	t = 1;
-	primus.write({'coin':coin,'height': -1})
+	currentCoin = coinName;
+	primus.write({'coin':coins[coinName].fullname,'height': -1})
 
 }
   

@@ -240,41 +240,41 @@ html(lang="en")
  script.
   $(document).ready(function(){
     $('#lite').click(function(){
-      //$('#area2').empty();
+      
       $('#litecoincirc').show();
       $('#bitcoincirc').hide();
       $('#dogecoincirc').hide();
-      reloadBlocks('litecoin');
-      //closesocket(coin);
+      reloadBlocks('ltc');
+      
       triggerTime(coin);
       console.log('socket '+coin+' closed');
     });
   });
  
  script.
-   $(document).ready(function(){
+  $(document).ready(function(){
     $('#bit').click(function(){
-      //$('#area2').empty();
+      
       $('#bitcoincirc').show();
       $('#litecoincirc').hide();
       $('#dogecoincirc').hide();
-      reloadBlocks('bitcoin');
-      //closesocket(coin);
+      reloadBlocks('btc');
+      
       triggerTime (coin);
       console.log('socket '+coin+' closed');
     });
-   });  
+  });  
  script.
-   $(document).ready(function(){
-     $('#doge').click(function(){
-        $('#area2').empty();
-        $('#dogecoincirc').show();
-        $('#litecoincirc').hide();
-        $('#bitcoincirc').hide();
-        reloadBlocks('dogecoin');
-        closesocket(coin);
-        triggerTime (coin);
-        console.log('socket '+coin+' closed');
+  $(document).ready(function(){
+    $('#doge').click(function(){
+        
+      $('#dogecoincirc').show();
+      $('#litecoincirc').hide();
+      $('#bitcoincirc').hide();
+      reloadBlocks('doge');
+     
+      triggerTime (coin);
+      console.log('socket '+coin+' closed');
           
-      });
-   });
+    });
+  });
