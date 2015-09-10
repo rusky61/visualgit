@@ -326,8 +326,11 @@ var primus = Primus.connect();
 
 primus.on("open", function (){
       console.log('connected');
-      //var lastHeight = data.nodes.length > 0 ? data.nodes[data.nodes.length-1].height : -1
-      primus.write({'subscribe':currentCoin});
+      var lastHeight = data.nodes.length > 0 ? data.nodes[data.nodes.length-1].height : -1;
+
+      // height is needed to support server restarts
+      // without is client would download all blocks again.
+      primus.write({'subscribe':currentCoin, 'height':lastHeight});
 });
 
 

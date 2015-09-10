@@ -51,6 +51,7 @@ var ltc = initializeData('ltc');
 var doge = initializeData('doge');
 
 var clients = [];
+var blockCacheSize = 70;
 
 server.listen(port);
 debug('Server binded on %j',server.address());
@@ -89,17 +90,21 @@ primus.on('connection', function(socket)  {
 		debug('message received: %j', msg);
 		//TODO: validate msg format
 		if (msg.subscribe){
+			var height = msg.height || -1;
 			if(msg.subscribe === 'btc'){
-				for(var i=0;i<btc.length;i++){
-					socket.write({op:'block',coin:'btc',data:btc[i]});
+				var blocks = getBlocksData(btc, height);
+				for(var i=0;i<blocks.length;i++){
+					socket.write({op:'block',coin:'btc',data:blocks[i]});
 				}
 			} else if (msg.subscribe === 'ltc'){
-				for(var i=0;i<ltc.length;i++){
-					socket.write({op:'block',coin:'ltc',data:ltc[i]});
+				var blocks = getBlocksData(ltc, height);
+				for(var i=0;i<blocks.length;i++){
+					socket.write({op:'block',coin:'ltc',data:blocks[i]});
 				}
 			} else if (msg.subscribe === 'doge'){
-				for(var i=0;i<doge.length;i++){
-					socket.write({op:'block',coin:'doge',data:doge[i]});
+				var blocks = getBlocksData(doge, height);
+				for(var i=0;i<blocks.length;i++){
+					socket.write({op:'block',coin:'doge',data:blocks[i]});
 				}
 			}
 		}else{
@@ -122,21 +127,32 @@ primus.on('disconnection', function (spark) {
 });
 
 
-/* Primus client doesn't support proxy, so for now we are using websockets for comunication to blokchain providers */
+
+function checkCacheSize(arr){
+	if (arr.length > blockCacheSize){
+		debug('trimming cache to %d blocks',blockCacheSize);
+		arr.length = blockCacheSize;
+	}
+}
 
 function addBlock(coin,block){
 	if (coin == 'doge'){
 		doge.unshift(block);
+		checkCacheSize(doge);
 		debug('Doge cache updated, currently %d blocks',doge.length);
 	}
 	if (coin == 'btc'){
 		btc.unshift(block);
+		checkCacheSize(btc);
 		debug('BTC cache updated, currently %d blocks',btc.length);
 	}
 	if (coin == 'ltc'){
 		ltc.unshift(block);
+		checkCacheSize(ltc);
 		debug('LTC cache updated, currently %d blocks',ltc.length);
 	}
+
+
 	// notify clients about new block, for now we notify all clients even they are subscribe for different coins.
 	// They can use this information to notify user about new block for the othe currency
 	clients.forEach(function(socket) {
@@ -144,6 +160,7 @@ function addBlock(coin,block){
 	});
 }
 
+/* Primus client doesn't support proxy, so for now we are using websockets for comunication to blokchain providers */
 var ws_btc = new WebSocket.Client('wss://bitcoin.toshi.io', [], wsOptions);
 
 ws_btc.on('open', function(event) {
