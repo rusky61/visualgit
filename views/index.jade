@@ -38,7 +38,7 @@ html(lang="en")
        | Contact
   .container-fluid
    .row  
-    #sidebar-wrapper.col-md-2.col-lg-2.panel.panel-primary
+    #sidebar-wrapper.col-md-2.col-lg-2.panel.panel-primary.col
       #break
        p
         block content
@@ -96,14 +96,13 @@ html(lang="en")
         a(href="https://en.bitcoin.it/wiki/Main_Page" target = "_blank") Dogecoin Blockchain info     
       span.hidden-xs.hidden-sm
        img.img-responsive(src="http://www.coincadence.com/api/embed/500x250")
-      span.hidden-xs.hidden-sm
-       iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/dogecoin/usd?id=dogecoin' style='border:none; height:100%; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true', )
- 
-      span.hidden-xs.hidden-sm
-       iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/litecoin/usd?id=litecoin' style='border:none; height:100%; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true', )
-    #area2.col-md-8.col-lg-8 
+      //span.hidden-xs.hidden-sm
+      iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/dogecoin/usd?id=dogecoin' style='border:none;width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
+      //span.hidden-xs.hidden-sm
+      iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/litecoin/usd?id=litecoin' style='border:none; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
+    #area2.col-md-8.col-lg-8.col
      #areatext Please wait bitcoin blocks on the way!!
-    #left-table.col-md-2.col-lg-2.hidden-sm.panel.panel-primary.table-responsive 
+    #left-table.col-md-2.col-lg-2.hidden-sm.panel.panel-primary.table-responsive.col 
      #break
       p                                                               
      .panel-heading
@@ -232,9 +231,9 @@ html(lang="en")
   
  script.
    $(document).ready(function(){
-     $('[data-toggle="popover"]').popover({ 
+    $('[data-toggle="popover"]').popover({ 
       trigger: "hover"   
-     });
+    });
    });
  
  script.

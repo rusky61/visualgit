@@ -11,22 +11,19 @@ body{
 }
 	
 .panel > .panel-heading {
-
 	background-color: #0000a0;
 }
 
 .panel {
-font-size:17px;
-text-align:justify;
+  font-size:17px;
+  text-align:justify;
 }
 #rightp{
-font-size:15px;
+  font-size:15px;
 }
 
 #areatext{
-
  width: 100%;
-//z-index:auto;
  display:none;
  font-size: 60px;
  position:absolute;
@@ -37,15 +34,13 @@ font-size:15px;
 }
 
 .newblock{
-
  top:50%;
  transform: translateY(-50%);
 
 }
 
-
 .crypto{
-font-size: 30px;
+  font-size: 30px;
 
 }
 .table {
@@ -69,40 +64,34 @@ table tbody tr td {
 	padding: 3px;
 }
 
- a {
-       font: 16px imprint mt shadow;     
+a {
+  font: 16px imprint mt shadow;     
 }
 #sidebar-wrapper {
-   
-    margin-top:60px; 
-
+  margin-top:60px; 
 }
+
 .panel-height {
-height:900px;
-background-color:red;
+  height:900px;
+  background-color:red;
 }
 
 #left-table{
-
-margin-top:60px;
-
-
+  margin-top:60px;
 }
+
 .row-colour {
-background-color:red;
+  background-color:red;
 }
 
 
 #area2{
-
-position:relative;
-top:0px;
-left:0px;
-    
-margin-top:60px;
-height:100%;
-
-
+  position:relative;
+  top:0px;
+  left:0px;
+      
+  margin-top:60px;
+  height:100%;
 }
 
 .node text {
@@ -115,33 +104,31 @@ height:100%;
 }
  
 .link {
-    stroke: black;
-    stroke-opacity: .9;
-    stroke-width: 4px;
+  stroke: black;
+  stroke-opacity: .9;
+  stroke-width: 4px;
 }
 
 
 div.tooltip {   
-    position: absolute;           
-    text-align: left;           
-    width: 200px;                   
-    height: 200;                   
-    padding: 2px;               
-    font: 16px imprint mt shadow;       
-    background: black;   
-    border: 2px;       
-    border-radius: 8px;
-    border-style:solid;
-    color: white;
-    border-color: black;  
-    pointer-events: none;           
+  position: absolute;           
+  text-align: left;           
+  width: 200px;                   
+  height: 200;                   
+  padding: 2px;               
+  font: 16px imprint mt shadow;       
+  background: black;   
+  border: 2px;       
+  border-radius: 8px;
+  border-style:solid;
+  color: white;
+  border-color: black;  
+  pointer-events: none;           
 }
 
 .navbar-brand  {
- font-size: 30px;
+  font-size: 30px;
 }
-
-
 
 .navbar-default {
 	background-color: #0000a0;
@@ -189,15 +176,20 @@ div.tooltip {
 .navbar-default .navbar-link:hover {
 }
 
+.col:not(:first-child),.col:not(:last-child) {
+  padding-right:0px;
+  padding-left:0px;
+}
 
-   
+.panel-body{
+  padding: 5px;
+}
 
- 
+h1 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 
-
-
-
-
-
-
-
+.sidebar-wrapper{
+  margin-bottom: 0px;
+}
