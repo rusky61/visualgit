@@ -118,7 +118,7 @@ function scheduleStrengthReset(){
  *Start source on 0 and target on 1 then increment. links nodes to the previous one. if orphans then would need to be changed.
  */
 
-function updateBlock(nodes){
+function updateD3Block(nodes){
 	if (nodes === undefined) return;
 
     data.nodes.push({"x":10, "y":10, "height":nodes.height, "hash": nodes.hash, "branch":nodes.branch, "previous_block_hash": nodes.previous_block_hash, 'confirmations': nodes.confirmations, 'merkle_root': nodes.merkle_root, 'time': nodes.time, 'nonce':nodes.nonce, 'bits':nodes.bits, 'difficulty':nodes.difficulty, 'reward':nodes.reward, 'fees':nodes.fees, 'total_out':nodes.total_out, 'size':nodes.size, 'transactions_count':nodes.transactions_count, });
@@ -259,8 +259,8 @@ function firstTableUpdate(d) {
 
 function latestBlock(callback){
 	var timer = setTimeout(function(){
-	var last = data.nodes[data.nodes.length-1];
-	callback(last);		
+		var last = data.nodes[data.nodes.length-1];
+		callback(last);		
 	},1000);
 }
 
@@ -310,38 +310,10 @@ $(window).scroll(function(){
  *Resize SVG on resize of window.
  */
 function resize() {
-
 	width = d.elmnt.offsetWidth, height = window.innerHeight + window.pageYOffset;
  	d.svgContainer.attr("width", width).attr("height", height);
  	d.force.size([width, height]).resume();
 }
-/*
- *Step 6: websocket to bitcoin.toshi to fetch most recent block.
- *
- */
-
-var socketbtc = Primus.connect('wss://bitcoin.toshi.io');
-	socketbtc.on('open', function(){
-	socketbtc.write({'subscribe':'blocks'});
-	console.log('message sent');
-});
-
-socketbtc.on('data', function incoming(evt){
-
-	var block = evt.data;
-	console.log('rcvd new btc'+ JSON.stringify(evt));
-
-	updateBlock(block);
-	triggerTime('btc');
-});
-
-socketbtc.on('reconnecting', function(opts){
-	console.log('reconnecting', opts.timeout);
-});
-
-socketbtc.on('error', function error(err){
-	console.error('error = ', err, err.message);
-});
 
 /*
  * Create primus object to open connection with Pi and recieve latest 100 blocks.
@@ -352,11 +324,10 @@ socketbtc.on('error', function error(err){
 
 var primus = Primus.connect();
 
-
 primus.on("open", function (){
       console.log('connected');
-      var lastHeight = data.nodes.length > 0 ? data.nodes[data.nodes.length-1].height : -1
-      primus.write({'coin':coins[currentCoin].fullname,'height': lastHeight});
+      //var lastHeight = data.nodes.length > 0 ? data.nodes[data.nodes.length-1].height : -1
+      primus.write({'subscribe':currentCoin});
 });
 
 
@@ -367,11 +338,15 @@ primus.on("data", function incoming(data){
 
 	console.log("new data incoming: ", data); 
 
-	for (i = 0; i < data.length; i++) { 
-		updateBlock(data[i]);
+	if (data.op === 'block'){
+		if (data.coin === currentCoin){
+			updateD3Block(data.data);
+			latestBlock(firstTableUpdate)
+			triggerTime('btc'); 
+		}
+		
 	}
-	latestBlock(firstTableUpdate)
-	triggerTime('btc'); 
+	
 });
 
 
@@ -389,7 +364,7 @@ function reloadBlocks(coinName){
 	s = 0;
 	t = 1;
 	currentCoin = coinName;
-	primus.write({'coin':coins[coinName].fullname,'height': -1})
+	primus.write({'subscribe':coinName})
 
 }
   
@@ -403,20 +378,4 @@ function show(){
 	setTimeout(function() {
 		$("#areatext").fadeOut();
 	}, 10000);
-}
-/*
- *close current socket when user clicks on another coin to view (e.g. Dogecoin, Litecoin)
- *
- */
-function closesocket(coin) {
-	if(coin == 1){
-		socketbtc.end()
-		console.log('bitcoin socket closed');
-	} else if (coin == 2) {
-		socket.end();	
-        console.log('litecoin socket closed');
-	} else if (coin == 3) {
-		socketdoge.end();
-		console.log('dogecoin socket closed');
-	}
 }
