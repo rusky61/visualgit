@@ -5,7 +5,7 @@
  * Module dependencies
  *
  * set environments:
- * DEBUG=*
+ * DEBUG=* or DEBUG=visualapp:server
  * env=development
  * WS_PROXY_URL=http://yourproxy:yourProxyPortNo
  */
