@@ -58,13 +58,23 @@ Coin.prototype.initializeData = function () {
 	return JSON.parse(data);
 }
 
+Coin.prototype.printBlocks = function () {
+	debug('blocks for %s %j',this.coin, this.blocks);
+}
+
 function BTC(){
+	this.acceptBlockKeys = ['hash'];
 	Coin.call(this,'btc');
 }
 util.inherits(BTC, Coin);
 
 BTC.prototype.addBlock = function (block){
-	return 1;
+	var keys = _.intersection(Object.keys(block),this.acceptBlockKeys);
+	var r = {};
+	_.forEach(keys,function(key){
+		r[key]=block[key];
+	});
+	this.blocks.push(r);
 }
 
 
@@ -72,7 +82,10 @@ BTC.prototype.addBlock = function (block){
 	this.blocks = initializeData('btc');
 }
 */
-//var btc2 = new BTC('btc');
+var btc2 = new BTC('btc');
+
+btc2.addBlock({'karol':'lolek','hash':'bolek'});
+//btc2.printBlocks();
 
 var btc = initializeData('btc');
 var ltc = initializeData('ltc');
