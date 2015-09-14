@@ -18,6 +18,7 @@ var WebSocket = require('faye-websocket');
 var util = require('util');
 
 var hitcounter = 0;
+var BLOCK_CACHE_SIZE = 70;
 /**
  * Get port from environment and it store in Express.
  */
@@ -41,15 +42,10 @@ var primus = new Primus(server, {transformer : 'websockets', parser : 'JSON'});
 //var Emitter = require ('primus-emitter');
 //primus.use('emitter', Emitter); 
 
-function initializeData(store) {
-	debug('Initializing data for %s',store);
-	var data = fs.readFileSync(__dirname +'/../data/'+store+'.json','utf8');
-	return JSON.parse(data);
-}
-
 function Coin(coin){
 	this.coin = coin;
 	this.blocks = this.initializeData();
+	this.acceptBlockKeys = [];
 }
 
 Coin.prototype.initializeData = function () {
@@ -62,37 +58,80 @@ Coin.prototype.printBlocks = function () {
 	debug('blocks for %s %j',this.coin, this.blocks);
 }
 
-function BTC(){
-	this.acceptBlockKeys = ['hash'];
-	Coin.call(this,'btc');
+Coin.prototype.addBlock = function(block){
+	this.blocks.unshift(block);
+	this.checkCacheSize();
+	debug('%s cache updated, currently %d blocks',this.coin,this.blocks.length);
 }
-util.inherits(BTC, Coin);
 
-BTC.prototype.addBlock = function (block){
+Coin.prototype.normalizeAndAddBlock = function (block){
 	var keys = _.intersection(Object.keys(block),this.acceptBlockKeys);
 	var r = {};
 	_.forEach(keys,function(key){
 		r[key]=block[key];
 	});
-	this.blocks.push(r);
+	this.addBlock(r);
+	return r;
 }
+
+Coin.prototype.getBlocksData = function(height){
+	var index = _.findIndex(this.blocks, function(el) {
+			return el.height == parseInt(height);
+	});
+	var part = this.blocks;
+	if (index > -1){
+		part = _.slice(this.blocks, ++index);
+	}
+	return part;
+}
+
+Coin.prototype.checkCacheSize = function(){
+	if (this.blocks.length > BLOCK_CACHE_SIZE){
+		debug('trimming cache to %d blocks',BLOCK_CACHE_SIZE);
+		this.blocks.length = BLOCK_CACHE_SIZE;
+	}
+}
+
+Coin.prototype.storeCachedBlocksToFile = function(){
+	debug('Storing block cache for %s',this.coin);
+	var fd = fs.openSync(__dirname +'/../data/'+this.coin+'.json', 'w');
+	fs.writeSync(fd,JSON.stringify(this.blocks),0,'utf-8');
+	fs.closeSync(fd);
+}
+
+function BTC(){
+	this.acceptBlockKeys = ['hash', 'branch', 'previous_block_hash', 'height','confirmations','merkle_root','time','created_at','nonce',
+		'bits','difficulty','reward','fees','total_out','size','transactions_count','version','index'];
+	Coin.call(this,'btc');
+}
+util.inherits(BTC, Coin);
+
+function LTC(){
+	this.acceptBlockKeys = ['hash', 'branch', 'previous_block_hash', 'height','confirmations','merkle_root','time','created_at','nonce',
+		'bits','difficulty','reward','fees','total_out','size','transactions_count','version'];
+	Coin.call(this,'ltc');
+}
+util.inherits(LTC, Coin);
 
 
 /*Coin.prototype.init = function(){
 	this.blocks = initializeData('btc');
 }
 */
-var btc2 = new BTC('btc');
+var coins = { 
+	'btc':new BTC(),
+	'ltc':new LTC(),
+}
 
-btc2.addBlock({'karol':'lolek','hash':'bolek'});
+//btc.addBlock({'karol':'lolek','hash':'bolek'});
 //btc2.printBlocks();
 
-var btc = initializeData('btc');
+/*var btc = initializeData('btc');
 var ltc = initializeData('ltc');
-var doge = initializeData('doge');
+var doge = initializeData('doge');*/
 
 var clients = [];
-var blockCacheSize = 70;
+
 
 server.listen(port);
 debug('Server binded on %j',server.address());
@@ -113,7 +152,7 @@ function normalizePort(val) {
   return false;
 }
 
-function getBlocksData(coin, height){
+/*function getBlocksData(coin, height){
 	var index = _.findIndex(coin, function(el) {
 			return el.height == parseInt(height);
 	});
@@ -122,7 +161,7 @@ function getBlocksData(coin, height){
 		part = _.slice(coin, ++index);
 	}
 	return part;
-}
+}*/
 
 primus.on('connection', function(socket)  {
 	clients.push(socket);
@@ -132,29 +171,20 @@ primus.on('connection', function(socket)  {
 		//TODO: validate msg format
 		if (msg.subscribe){
 			var height = msg.height || -1;
-			if(msg.subscribe === 'btc'){
-				var blocks = getBlocksData(btc, height);
+			if (!_.isUndefined(coins[msg.subscribe])){
+				var blocks = coins[msg.subscribe].getBlocksData(height);
 				for(var i=0;i<blocks.length;i++){
-					socket.write({op:'block',coin:'btc',data:blocks[i]});
+					socket.write({op:'block',coin:msg.subscribe,data:blocks[i]});
 				}
-			} else if (msg.subscribe === 'ltc'){
-				var blocks = getBlocksData(ltc, height);
-				for(var i=0;i<blocks.length;i++){
-					socket.write({op:'block',coin:'ltc',data:blocks[i]});
-				}
-			} else if (msg.subscribe === 'doge'){
-				var blocks = getBlocksData(doge, height);
-				for(var i=0;i<blocks.length;i++){
-					socket.write({op:'block',coin:'doge',data:blocks[i]});
-				}
+			}else{
+				debug('Client: Unrecognized coin symbol in subscribe');	
 			}
 		}else{
-			debug('Unrecognized message');
+			debug('Client: Unrecognized message');
 		}
 	});
 	
 });
-
 
 
 primus.on('end', function () {
@@ -168,32 +198,7 @@ primus.on('disconnection', function (spark) {
 });
 
 
-
-function checkCacheSize(arr){
-	if (arr.length > blockCacheSize){
-		debug('trimming cache to %d blocks',blockCacheSize);
-		arr.length = blockCacheSize;
-	}
-}
-
-function addBlock(coin,block){
-	if (coin == 'doge'){
-		doge.unshift(block);
-		checkCacheSize(doge);
-		debug('Doge cache updated, currently %d blocks',doge.length);
-	}
-	if (coin == 'btc'){
-		btc.unshift(block);
-		checkCacheSize(btc);
-		debug('BTC cache updated, currently %d blocks',btc.length);
-	}
-	if (coin == 'ltc'){
-		ltc.unshift(block);
-		checkCacheSize(ltc);
-		debug('LTC cache updated, currently %d blocks',ltc.length);
-	}
-
-
+function notifyClients(coin,block){
 	// notify clients about new block, for now we notify all clients even they are subscribe for different coins.
 	// They can use this information to notify user about new block for the othe currency
 	clients.forEach(function(socket) {
@@ -212,7 +217,8 @@ ws_btc.on('open', function(event) {
 ws_btc.on('message', function(event) {
 	debug('BTC provider msg: %s',event.data);
 	var data = JSON.parse(event.data);
-	addBlock('btc',data.data);
+	var nBlock = coins['btc'].normalizeAndAddBlock(data.data);
+	notifyClients('btc',nBlock);
 });
 
 ws_btc.on('close', function(event) {
@@ -224,7 +230,7 @@ ws_btc.on('error', function(event) {
   debug('BTC error %j', event);
 });
 
-var ws_doge = new WebSocket.Client('wss://ws.dogechain.info/inv', [], wsOptions);
+/*var ws_doge = new WebSocket.Client('wss://ws.dogechain.info/inv', [], wsOptions);
 
 ws_doge.on('open', function(event) {
 	ws_doge.send(JSON.stringify({'op':'blocks_sub'}));
@@ -247,7 +253,7 @@ ws_doge.on('close', function(event) {
 
 ws_doge.on('error', function(event) {
   debug('Doge: error %j', event);
-});
+});*/
 
 var ws_ltc = new WebSocket.Client('wss://litecoin.toshi.io', [], wsOptions);
 
@@ -259,7 +265,8 @@ ws_ltc.on('open', function(event) {
 ws_ltc.on('message', function(event) {
 	debug('LTC provider msg: %s',event.data);
 	var data = JSON.parse(event.data);
-	addBlock('ltc',data.data);
+	var nBlock = coins['ltc'].normalizeAndAddBlock(data.data);
+	notifyClients('ltc',nBlock);
 });
 
 ws_ltc.on('close', function(event) {
@@ -273,18 +280,11 @@ ws_ltc.on('error', function(event) {
 
 // do app specific cleaning before exiting
 process.on('exit', function () {
-	//process.emit('cleanup');
 	debug('Storing block cache to files');
-	//TODO: should be refactor to comon function
-	var btcFd = fs.openSync(__dirname +'/../data/btc.json', 'w');
-	fs.writeSync(btcFd,JSON.stringify(btc),0,'utf-8');
-	fs.closeSync(btcFd);
-	var ltcFd = fs.openSync(__dirname +'/../data/ltc.json', 'w');
-	fs.writeSync(ltcFd,JSON.stringify(ltc),0,'utf-8');
-	fs.closeSync(ltcFd);
-	var dogeFd = fs.openSync(__dirname +'/../data/doge.json', 'w');
-	fs.writeSync(dogeFd,JSON.stringify(doge),0,'utf-8');
-	fs.closeSync(dogeFd);
+	_.forEach(coins,function(coin,key){
+		//debug('k %j %j',key,coin);
+		coin.storeCachedBlocksToFile();
+	});
 });
 
 // catch ctrl+c event and exit normally
