@@ -46,6 +46,34 @@ function initializeData(store) {
 	var data = fs.readFileSync(__dirname +'/../data/'+store+'.json','utf8');
 	return JSON.parse(data);
 }
+
+function Coin(coin){
+	this.coin = coin;
+	this.blocks = this.initializeData();
+}
+
+Coin.prototype.initializeData = function () {
+	debug('Initializing data for %s',this.coin);
+	var data = fs.readFileSync(__dirname +'/../data/'+this.coin+'.json','utf8');
+	return JSON.parse(data);
+}
+
+function BTC(){
+	Coin.call(this,'btc');
+}
+util.inherits(BTC, Coin);
+
+BTC.prototype.addBlock = function (block){
+	return 1;
+}
+
+
+/*Coin.prototype.init = function(){
+	this.blocks = initializeData('btc');
+}
+*/
+//var btc2 = new BTC('btc');
+
 var btc = initializeData('btc');
 var ltc = initializeData('ltc');
 var doge = initializeData('doge');
@@ -258,3 +286,32 @@ process.on('uncaughtException', function(e) {
 	console.log(e.stack);
 	process.exit(99);
 });
+
+// bitstamp connection
+// pusher-node-client doesn't have a proxy support for now. I have requested this feature on github
+// https://github.com/abhishiv/pusher-node-client/issues/12
+
+/*var Pusher = require('pusher-node-client').PusherClient;
+
+var bitstamp = new Pusher({
+	key: 'de504dc5763aeef9ff52',
+    appId: '',
+    secret: '' 
+});
+
+
+
+bitstamp.on('connect', function(){
+	debug('Bitstamp is conected');
+	var trades_channel = bitstamp.subscribe('live_trades');
+	trades_channel.on('success', function(data) {
+		debug('Bitstamp msg: %j',data);
+	});
+	
+	trades_channel.bind('trade', function(data) {
+		debug('Bitstamp msg: %j',data);
+	});
+}); 
+
+bitstamp.connect(); 
+debug(bitstamp);*/
