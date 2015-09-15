@@ -17,7 +17,6 @@ var _ = require('lodash-node');
 var WebSocket = require('faye-websocket');
 var util = require('util');
 
-var hitcounter = 0;
 var BLOCK_CACHE_SIZE = 70;
 /**
  * Get port from environment and it store in Express.
@@ -45,26 +44,30 @@ var primus = new Primus(server, {transformer : 'websockets', parser : 'JSON'});
 function Coin(coin){
 	this.coin = coin;
 	this.blocks = this.initializeData();
-	this.acceptBlockKeys = [];
 }
 
+/*Loads block cache from file*/
 Coin.prototype.initializeData = function () {
 	debug('Initializing data for %s',this.coin);
 	var data = fs.readFileSync(__dirname +'/../data/'+this.coin+'.json','utf8');
 	return JSON.parse(data);
 }
 
+/*prints block cache*/
 Coin.prototype.printBlocks = function () {
 	debug('blocks for %s %j',this.coin, this.blocks);
 }
 
+/*Adds block to cache and trim the cache if needed*/
 Coin.prototype.addBlock = function(block){
 	this.blocks.unshift(block);
 	this.checkCacheSize();
 	debug('%s cache updated, currently %d blocks',this.coin,this.blocks.length);
 }
 
+/*Nomralize and add block to cache*/
 Coin.prototype.normalizeAndAddBlock = function (block){
+	//debug('normalize %s %j',this.coin,this.acceptBlockKeys);
 	var keys = _.intersection(Object.keys(block),this.acceptBlockKeys);
 	var r = {};
 	_.forEach(keys,function(key){
@@ -74,17 +77,26 @@ Coin.prototype.normalizeAndAddBlock = function (block){
 	return r;
 }
 
+/*Gets last blocks from cache*/
 Coin.prototype.getBlocksData = function(height){
-	var index = _.findIndex(this.blocks, function(el) {
-			return el.height == parseInt(height);
-	});
-	var part = this.blocks;
-	if (index > -1){
-		part = _.slice(this.blocks, ++index);
+	var index = -1;
+	if (height != -1){
+		index = _.findIndex(this.blocks, function(el) {
+				return el.height == parseInt(height);
+		});
+	}
+	
+	var part = [];
+	if (index === -1){
+		part = this.blocks;
+	}else if (index > 0){
+		//debug('getblocks slice index %d height %d',index, height);
+		part = _.slice(this.blocks,0, index);
 	}
 	return part;
 }
 
+/*Trims cache if needed*/
 Coin.prototype.checkCacheSize = function(){
 	if (this.blocks.length > BLOCK_CACHE_SIZE){
 		debug('trimming cache to %d blocks',BLOCK_CACHE_SIZE);
@@ -92,6 +104,7 @@ Coin.prototype.checkCacheSize = function(){
 	}
 }
 
+/*Serialize block cache to file*/
 Coin.prototype.storeCachedBlocksToFile = function(){
 	debug('Storing block cache for %s',this.coin);
 	var fd = fs.openSync(__dirname +'/../data/'+this.coin+'.json', 'w');
@@ -113,6 +126,11 @@ function LTC(){
 }
 util.inherits(LTC, Coin);
 
+function DOGE(){
+	this.acceptBlockKeys = ['nonce', 'merkleroot', 'hash', 'height','difficulty','n_tx','size','miner','version','time','reward','bits'];
+	Coin.call(this,'doge');
+}
+util.inherits(DOGE, Coin);
 
 /*Coin.prototype.init = function(){
 	this.blocks = initializeData('btc');
@@ -121,17 +139,12 @@ util.inherits(LTC, Coin);
 var coins = { 
 	'btc':new BTC(),
 	'ltc':new LTC(),
+	'doge':new DOGE()
 }
 
-//btc.addBlock({'karol':'lolek','hash':'bolek'});
-//btc2.printBlocks();
 
-/*var btc = initializeData('btc');
-var ltc = initializeData('ltc');
-var doge = initializeData('doge');*/
-
+/*All clients connections are stored in this array*/
 var clients = [];
-
 
 server.listen(port);
 debug('Server binded on %j',server.address());
@@ -152,17 +165,6 @@ function normalizePort(val) {
   return false;
 }
 
-/*function getBlocksData(coin, height){
-	var index = _.findIndex(coin, function(el) {
-			return el.height == parseInt(height);
-	});
-	var part = coin;
-	if (index > -1){
-		part = _.slice(coin, ++index);
-	}
-	return part;
-}*/
-
 primus.on('connection', function(socket)  {
 	clients.push(socket);
 	debug('new connection from %s & concurrent clients number :%d',socket.address.ip, clients.length);
@@ -173,9 +175,12 @@ primus.on('connection', function(socket)  {
 			var height = msg.height || -1;
 			if (!_.isUndefined(coins[msg.subscribe])){
 				var blocks = coins[msg.subscribe].getBlocksData(height);
-				for(var i=0;i<blocks.length;i++){
+				_.forEachRight(blocks, function(block){
+					socket.write({op:'block',coin:msg.subscribe,data:block});
+				});
+				/*for(var i=0;i<blocks.length;i++){
 					socket.write({op:'block',coin:msg.subscribe,data:blocks[i]});
-				}
+				}*/
 			}else{
 				debug('Client: Unrecognized coin symbol in subscribe');	
 			}
@@ -198,9 +203,9 @@ primus.on('disconnection', function (spark) {
 });
 
 
+/*Notifies clients about new block, for now we notify all clients even they are subscribe for different coins.
+Clients can use this information to notify user about new block for the other currency*/
 function notifyClients(coin,block){
-	// notify clients about new block, for now we notify all clients even they are subscribe for different coins.
-	// They can use this information to notify user about new block for the othe currency
 	clients.forEach(function(socket) {
     	socket.write({op:'block',coin:coin,data:block});
 	});
@@ -230,7 +235,7 @@ ws_btc.on('error', function(event) {
   debug('BTC error %j', event);
 });
 
-/*var ws_doge = new WebSocket.Client('wss://ws.dogechain.info/inv', [], wsOptions);
+var ws_doge = new WebSocket.Client('wss://ws.dogechain.info/inv', [], wsOptions);
 
 ws_doge.on('open', function(event) {
 	ws_doge.send(JSON.stringify({'op':'blocks_sub'}));
@@ -242,7 +247,9 @@ ws_doge.on('message', function(event) {
 	var data = JSON.parse(event.data);
 	if (data.op == 'block'){
 		debug('Doge - new block received');
-		addBlock('doge',data.x)
+		var nBlock = coins['doge'].normalizeAndAddBlock(data.x);
+		debug('Doge normalized: %j',nBlock);
+		notifyClients('doge',nBlock);
 	}
 });
 
@@ -253,7 +260,7 @@ ws_doge.on('close', function(event) {
 
 ws_doge.on('error', function(event) {
   debug('Doge: error %j', event);
-});*/
+});
 
 var ws_ltc = new WebSocket.Client('wss://litecoin.toshi.io', [], wsOptions);
 
@@ -282,7 +289,6 @@ ws_ltc.on('error', function(event) {
 process.on('exit', function () {
 	debug('Storing block cache to files');
 	_.forEach(coins,function(coin,key){
-		//debug('k %j %j',key,coin);
 		coin.storeCachedBlocksToFile();
 	});
 });
