@@ -41,9 +41,13 @@ var primus = new Primus(server, {transformer : 'websockets', parser : 'JSON'});
 //var Emitter = require ('primus-emitter');
 //primus.use('emitter', Emitter); 
 
+//disable console.log
+console.log = function(){};
+
 function Coin(coin){
 	this.coin = coin;
 	this.blocks = this.initializeData();
+	this.priceChanged = false;
 }
 
 /*Loads block cache from file*/
@@ -118,6 +122,7 @@ function BTC(){
 	Coin.call(this,'btc');
 }
 util.inherits(BTC, Coin);
+
 
 function LTC(){
 	this.acceptBlockKeys = ['hash', 'branch', 'previous_block_hash', 'height','confirmations','merkle_root','time','created_at','nonce',
@@ -248,7 +253,7 @@ ws_doge.on('message', function(event) {
 	if (data.op == 'block'){
 		debug('Doge - new block received');
 		var nBlock = coins['doge'].normalizeAndAddBlock(data.x);
-		debug('Doge normalized: %j',nBlock);
+		//debug('Doge normalized: %j',nBlock);
 		notifyClients('doge',nBlock);
 	}
 });
@@ -310,14 +315,15 @@ process.on('uncaughtException', function(e) {
 // pusher-node-client doesn't have a proxy support for now. I have requested this feature on github
 // https://github.com/abhishiv/pusher-node-client/issues/12
 
-/*var Pusher = require('pusher-node-client').PusherClient;
+var Pusher = require('./pusher-node-client-proxy').PusherClient;
+
 
 var bitstamp = new Pusher({
 	key: 'de504dc5763aeef9ff52',
     appId: '',
-    secret: '' 
+    secret: '',
+    proxy: wsOptions
 });
-
 
 
 bitstamp.on('connect', function(){
@@ -327,10 +333,33 @@ bitstamp.on('connect', function(){
 		debug('Bitstamp msg: %j',data);
 	});
 	
-	trades_channel.bind('trade', function(data) {
-		debug('Bitstamp msg: %j',data);
+	trades_channel.on('trade', function(data) {
+		debug('Bitstamp trade msg: %j',data);
+		if (coins['btc'].lastPrice != data.price){
+			coins['btc'].lastPrice = data.price;
+			coins['btc'].priceChanged = true;
+			debug('BTC price change to:',data.price);
+		}
+
 	});
 }); 
 
 bitstamp.connect(); 
-debug(bitstamp);*/
+
+/*Sends prices updates to all clients with max 5s delay.*/
+function updateClientsWithCoinPrice(){
+	//debug('check price update');
+
+	if (coins['btc'].priceChanged){
+		coins['btc'].priceChanged = false;
+	    clients.forEach(function(socket) {
+	    	socket.write({op:'price',prices:{'btc':coins['btc'].lastPrice}});
+		});
+		debug('sent new price update to all clients');
+	}
+}
+
+//updateClientsWithCoinPrice();
+setInterval(function(){
+	updateClientsWithCoinPrice();
+}, 5000);

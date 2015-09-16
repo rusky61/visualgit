@@ -348,6 +348,8 @@ primus.on("data", function incoming(data){
 			triggerTime('btc'); 
 		}
 		
+	} else if( data.op === 'price'){
+		$('.btcPrice').html("BTC "+data.prices.btc + " USD");
 	}
 	
 });

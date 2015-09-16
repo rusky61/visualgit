@@ -95,11 +95,12 @@ html(lang="en")
           br
         a(href="https://en.bitcoin.it/wiki/Main_Page" target = "_blank") Dogecoin Blockchain info     
       span.hidden-xs.hidden-sm
-       img.img-responsive(src="http://www.coincadence.com/api/embed/500x250")
-      //span.hidden-xs.hidden-sm
-      iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/dogecoin/usd?id=dogecoin' style='border:none;width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
-      //span.hidden-xs.hidden-sm
-      iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/litecoin/usd?id=litecoin' style='border:none; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
+        p.text-center.btcPrice
+          |BTC - USD
+      span.hidden-xs.hidden-sm
+        iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/dogecoin/usd?id=dogecoin' style='border:none;width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
+      span.hidden-xs.hidden-sm
+        iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/litecoin/usd?id=litecoin' style='border:none; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
     #area2.col-md-8.col-lg-8.col
      #areatext Please wait bitcoin blocks on the way!!
     #left-table.col-md-2.col-lg-2.hidden-sm.panel.panel-primary.table-responsive.col 
