@@ -354,9 +354,12 @@ primus.on("data", function incoming(data){
 		  $('#'+key+'Value').html(value);
 		  var color = "#FC2D31";
 		  if (oldval < value ) color = "#77FC80";
-		  $('#'+key+'Value').animate({backgroundColor: color}, 500, function() {
-			$(this).animate( { backgroundColor: '#fff' }, 500);
-		  });
+
+		  if (oldval != value){
+			  $('#'+key+'Value').animate({backgroundColor: color}, 500, function() {
+				$(this).animate( { backgroundColor: '#fff' }, 500);
+			  });
+		  }
 		});
 	}
 	

@@ -42,7 +42,7 @@ var primus = new Primus(server, {transformer : 'websockets', parser : 'JSON'});
 //primus.use('emitter', Emitter); 
 
 //disable console.log
-console.log = function(){};
+//console.log = function(){};
 
 function Coin(coin){
 	this.coin = coin;
