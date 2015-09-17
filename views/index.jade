@@ -8,6 +8,7 @@ html(lang="en")
   link(rel="stylesheet", href="stylesheets/main.css")
   script(type="text/javascript", src="/javascripts/d3.js")
   script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
+  script(src="http://code.jquery.com/color/jquery.color-2.1.2.min.js")
   script(type='text/javascript', src='/primus/primus.js')
   script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
   script(type='text/javascript', src='/javascripts/gauge.js')
@@ -39,9 +40,21 @@ html(lang="en")
   .container-fluid
    .row  
     #sidebar-wrapper.col-md-2.col-lg-2.panel.panel-primary.col
-      #break
-       p
-        block content
+      #prices
+        table(style='width:100%;')
+          tbody
+            tr
+              td#btcSymbol BTC
+              td#btcValue(style="backgroundcolor") 100
+              td#btcUSD USD
+            tr
+              td#ltcSymbol LTC
+              td#ltcValue 100
+              td#ltcUSD USD
+            tr
+              td#dogeSymbol DOGE
+              td#dogeValue 100
+              td#dogeUSD USD
       .panel-heading
          h4.panel-title 
           span.glyphicon.glyphicon-plus
@@ -94,13 +107,6 @@ html(lang="en")
         a(href="https://www.coindesk.com/news" target = "_blank") Coindesk Latest news 
           br
         a(href="https://en.bitcoin.it/wiki/Main_Page" target = "_blank") Dogecoin Blockchain info     
-      span.hidden-xs.hidden-sm
-        p.text-center.btcPrice
-          |BTC - USD
-      span.hidden-xs.hidden-sm
-        iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/dogecoin/usd?id=dogecoin' style='border:none;width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
-      span.hidden-xs.hidden-sm
-        iframe(id='widget-ticker',src='//www.coingecko.com/en/widget_component/ticker/litecoin/usd?id=litecoin' style='border:none; width:100%;' scrolling='no' frmaeborder='0' allowtransparency='true')
     #area2.col-md-8.col-lg-8.col
      #areatext Please wait bitcoin blocks on the way!!
     #left-table.col-md-2.col-lg-2.hidden-sm.panel.panel-primary.table-responsive.col 

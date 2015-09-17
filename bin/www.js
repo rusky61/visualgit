@@ -183,9 +183,11 @@ primus.on('connection', function(socket)  {
 				_.forEachRight(blocks, function(block){
 					socket.write({op:'block',coin:msg.subscribe,data:block});
 				});
-				/*for(var i=0;i<blocks.length;i++){
-					socket.write({op:'block',coin:msg.subscribe,data:blocks[i]});
-				}*/
+
+				/*Update customer with priceses only when he connects*/
+				if (height === -1){
+					updateClientWithPrices(socket);
+				}
 			}else{
 				debug('Client: Unrecognized coin symbol in subscribe');	
 			}
@@ -346,8 +348,26 @@ bitstamp.on('connect', function(){
 
 bitstamp.connect(); 
 
+/*Sends all current prices to one client*/
+function updateClientWithPrices(socket){
+	var msg = {op:'price'};
+	var prices = {};
+	_.forEach(coins, function (coin,key){
+		if (coin.lastPrice){
+			debug('found price to be sent %d, %s',coin.lastPrice,key);
+			prices[key] = coin.lastPrice;
+		}
+	});
+	//debug('p l %d',prices.length);
+	if (Object.keys(prices).length > 0){
+		msg.prices = prices;
+		socket.write(msg);
+	}
+}
+
+
 /*Sends prices updates to all clients with max 5s delay.*/
-function updateClientsWithCoinPrice(){
+function updateAllClientsWithCoinPrice(){
 	//debug('check price update');
 
 	if (coins['btc'].priceChanged){
@@ -361,5 +381,5 @@ function updateClientsWithCoinPrice(){
 
 //updateClientsWithCoinPrice();
 setInterval(function(){
-	updateClientsWithCoinPrice();
+	updateAllClientsWithCoinPrice();
 }, 5000);

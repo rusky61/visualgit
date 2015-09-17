@@ -349,7 +349,15 @@ primus.on("data", function incoming(data){
 		}
 		
 	} else if( data.op === 'price'){
-		$('.btcPrice').html("BTC "+data.prices.btc + " USD");
+		$.each(data.prices, function( key, value ) {
+		  var oldval = $('#'+key+'Value').html();
+		  $('#'+key+'Value').html(value);
+		  var color = "#FC2D31";
+		  if (oldval < value ) color = "#77FC80";
+		  $('#'+key+'Value').animate({backgroundColor: color}, 500, function() {
+			$(this).animate( { backgroundColor: '#fff' }, 500);
+		  });
+		});
 	}
 	
 });
