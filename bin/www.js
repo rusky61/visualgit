@@ -147,6 +147,27 @@ var coins = {
 	'doge':new DOGE()
 }
 
+function initializePriceData() {
+	debug('Initializing price data ...');
+	var data = fs.readFileSync(__dirname +'/../data/prices.json','utf8');
+	var prices = JSON.parse(data);
+	_.forEach(prices,function(coinPrice,key){
+		coins[key].lastPrice = coinPrice;
+	});
+}
+
+function storePricesToFile(){
+	debug('Storing prices to file');
+	var prices = {};
+	_.forEach(coins,function(coin,key){
+		prices[key] = coin.lastPrice;
+	});
+	var fd = fs.openSync(__dirname +'/../data/prices.json', 'w');
+	fs.writeSync(fd,JSON.stringify(prices),0,'utf-8');
+	fs.closeSync(fd);
+}
+
+initializePriceData();
 
 /*All clients connections are stored in this array*/
 var clients = [];
@@ -191,7 +212,10 @@ primus.on('connection', function(socket)  {
 			}else{
 				debug('Client: Unrecognized coin symbol in subscribe');	
 			}
-		}else{
+		}else if (msg.op == "chat"){
+			notifyClientsChat(msg.text);
+		}
+		else{
 			debug('Client: Unrecognized message');
 		}
 	});
@@ -209,12 +233,18 @@ primus.on('disconnection', function (spark) {
 	
 });
 
+function notifyClientsChat(text){
+	clients.forEach(function(socket) {
+    	socket.write({op:'chat',text:text});
+	});
+}
+
 
 /*Notifies clients about new block, for now we notify all clients even they are subscribe for different coins.
 Clients can use this information to notify user about new block for the other currency*/
 function notifyClients(coin,block){
 	clients.forEach(function(socket) {
-    	socket.write({op:'block',coin:coin,data:block});
+    	socket.write({op:'block',coin:coin,data:block,fresh:1});
 	});
 }
 
@@ -298,6 +328,7 @@ process.on('exit', function () {
 	_.forEach(coins,function(coin,key){
 		coin.storeCachedBlocksToFile();
 	});
+	storePricesToFile();
 });
 
 // catch ctrl+c event and exit normally
@@ -313,7 +344,7 @@ process.on('uncaughtException', function(e) {
 	process.exit(99);
 });
 
-// bitstamp connection
+// bitstamp connection for BTC/USD market
 // pusher-node-client doesn't have a proxy support for now. I have requested this feature on github
 // https://github.com/abhishiv/pusher-node-client/issues/12
 
@@ -383,3 +414,52 @@ function updateAllClientsWithCoinPrice(){
 setInterval(function(){
 	updateAllClientsWithCoinPrice();
 }, 5000);
+
+
+/*
+cyptsy: https://www.cryptsy.com/pages/pushapi
+markets:
+	LTC/USD 1
+	DOGE/USD 182
+*/
+var cryptsy = new Pusher({
+	key: 'cb65d0a7a72cd94adf1f',
+    appId: '',
+    secret: '',
+    proxy: wsOptions
+});
+
+
+cryptsy.on('connect', function(){
+	debug('cryptsy is conected');
+	var ltc_usd = cryptsy.subscribe('trade.1');
+	ltc_usd.on('success', function(data) {
+		debug('cryptsy ltc/usd msg: %j',data);
+	});
+
+	ltc_usd.on('trade', function(data) {
+		debug('cryptsy ltc/usd trade msg: %j',data);
+	});
+
+	var doge_usd = cryptsy.subscribe('trade.182');
+	doge_usd.on('success', function(data) {
+		debug('cryptsy doge/usd msg: %j',data);
+	});
+
+	doge_usd.on('trade', function(data) {
+		debug('cryptsy doge/usd trade msg: %j',data);
+	});
+
+	
+	/*trades_channel.on('trade', function(data) {
+		debug('cryptsy trade msg: %j',data);
+		if (coins['btc'].lastPrice != data.price){
+			coins['btc'].lastPrice = data.price;
+			coins['btc'].priceChanged = true;
+			debug('BTC price change to:',data.price);
+		}
+
+	});*/
+}); 
+
+cryptsy.connect(); 

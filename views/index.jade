@@ -5,6 +5,7 @@ html(lang="en")
   title Cryptocurrency visualization
   link(rel="icon",href="images/favicon.ico")
   link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css", rel="stylesheet")
+  link(href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css", rel="stylesheet")
   link(rel="stylesheet", href="stylesheets/main.css")
   script(type="text/javascript", src="/javascripts/d3.js")
   script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
@@ -12,6 +13,8 @@ html(lang="en")
   script(type='text/javascript', src='/primus/primus.js')
   script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
   script(type='text/javascript', src='/javascripts/gauge.js')
+  script(type='text/javascript', src='/javascripts/jqueryrotate.min.js')
+  script(type='text/javascript', src='//code.jquery.com/ui/1.11.4/jquery-ui.js')
  body
   #header.navbar.navbar-default.navbar-fixed-top
    .navbar-header
@@ -24,15 +27,15 @@ html(lang="en")
      li
       a#bit.crypto(href = "#bitcoin" title ="bitcoin")
        | Bitcoin
-       img(src="images/Bitcoin.png", style="width:30px;height:30px")
+       img#btcIcon(src="images/Bitcoin.png", style="width:30px;height:30px")
      li
       a#lite.crypto(href ="#litecoin")
        | Litecoin
-       img(src="images/Litecoin.png", style="width:30px;height:30px")
+       img#ltcIcon(src="images/Litecoin.png", style="width:30px;height:30px")
      li
       a#doge.crypto(href="#dogecoin")
        | Dogecoin
-       img(src="images/dogecoin.png", style="width:30px;height:30px")
+       img#dogeIcon(src="images/dogecoin.png", style="width:30px;height:30px")
     ul.nav.navbar-nav.pull-right
      li
       a.crypto(href="#")
@@ -43,52 +46,64 @@ html(lang="en")
       #prices
         table(style='width:100%;')
           tbody
-            tr
+            tr( data-toggle="popover", data-container="body", data-placement="right", data-html="true", data-content = 'Current BTC price in USD.<br/> Up to 5 sec delay. Price provider: <a href="">https://www.bitstamp.net/</a>')
+              td 1
               td#btcSymbol BTC
-              td#btcValue 100
+              td#btcValue -
               td#btcUSD USD
-            tr
+            tr( data-toggle="popover", data-container="body", data-placement="right", data-html="true", data-content = 'Current LTC price in USD.<br/> Up to 5 sec delay. Price provider: <a href="">https://www.cryptsy.com/</a>')
+              td 1
               td#ltcSymbol LTC
-              td#ltcValue 100
+              td#ltcValue -
               td#ltcUSD USD
-            tr
+            tr( data-toggle="popover", data-container="body", data-placement="right", data-html="true", data-content = 'Current 1000 DOGE price in USD.<br/> Up to 5 sec delay. Price provider: <a href="">https://www.cryptsy.com/</a>')
+              td 1K
               td#dogeSymbol DOGE
-              td#dogeValue 100
+              td#dogeValue -
               td#dogeUSD USD
+      //.panel-group
+      .panel.panel-default.panel-primary
+        .panel-heading
+          h4.panel-title
+            a(data-toggle="collapse" href="#collapse1") Event console
+        #collapse1.panel-collapse.collapse.in
+          .panel-body
+            textarea.form-control#events-console(rows="5")
+
       .panel-heading
          h4.panel-title 
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseOne')  What is Bitcoin? 
        #collapseOne.panel.collapse.collapse
-        .panel-body    
+        .panel-body.small 
          |Bitcoin is a digital currency. No one controls it. There are no actual Bitcoins but there is a record of all transactions from the beginning. So, Bitcoin does NOT point to a digital or physical coin like we are used to when checking our bank account. It is decentralised meaning there is no central server running bitcoin. It is run by a network of participants knwon as nodes.  A person can download a Bitcoin wallet to get his/her own personnal bitcoin address which is made up of random letters and numbers.  
       .panel-heading   	
          h3.panel-title
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseThree')  What is the Bitcoin blockchain?
        #collapseThree.panel.collapse
-        .panel-body   
-         |The Blockchain is an online public ledger where all transactions are stored. An analogy: The blockchain is a train. Each carriage is a block which carries 'letters' (transactions). A carriage appears, collects up all new letters (tx's) in a 10 minute window then shuts the door. The carriage and letters are checked and locked by special people (miners) who get given a reward for doing so. The carriage is then connected to the previous one. In this visualisation, the carriage or block is represented by a coin. Click on one and you will see the number of transactions in that block. of course to do the above, Bitcoin uses complex cryptographic techniques.  	 
+        .panel-body.small
+          |The Blockchain is an online public ledger where all transactions are stored. An analogy: The blockchain is a train. Each carriage is a block which carries 'letters' (transactions). A carriage appears, collects up all new letters (tx's) in a 10 minute window then shuts the door. The carriage and letters are checked and locked by special people (miners) who get given a reward for doing so. The carriage is then connected to the previous one. In this visualisation, the carriage or block is represented by a coin. Click on one and you will see the number of transactions in that block. of course to do the above, Bitcoin uses complex cryptographic techniques.  	 
       .panel-heading
          h4.panel-title 
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseTwo')  What are Bitcoin transactions? 
        #collapseTwo.panel.collapse.collapse
-        .panel-body    
+        .panel-body.small
          |In actual fact a bitcoin address is made up of 2 parts (a private and public address intimately related). A private address sits secured on a persons computer and a public one is given to anyone. Everyone is only identified by their public address. 'Frank' sends 50 btc's (a unit of bitcoin) to 'Suzy'. His balance goes down and hers goes up. The transaction is then recorded on the blockchain. To check his balance, he checks how many unspent btc's are linked to his address on the blockchain.  
       .panel-heading
          h4.panel-title
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseFour')  Why do we have litecoins and dogecoins?
        #collapseFour.panel.collapse.collapse
-        .panel-body
+        .panel-body.small
          |Bitcoin software is open source enabling people to improve on the source code. With an increase in popularity people cloned bitcoin and changed parameters and algorithms. Some for the better some for the worse. Litecoin changed the reward miners receive for each block and also changed the algorithm used by miners to 'lock up' blocks. The Total number of Litecoins that will ever be made = 84,000,000 Ltc. Dogecoin is a fun coin and again a clone of Litecoin. This time the total number of Litecoins made = 98 billion doge + an extra 10% year on year. The rewards are currently set to 25 btc, 50 ltc and 10,000 doge for mining each respective block (btc, ltc and doge are units of each digital currency).
       .panel-heading
          h4.panel-title
           span.glyphicon.glyphicon-plus
           a(data-toggle='collapse', data-parent='#accordion', href='#collapseFive')  What does this visualisation show?
        #collapseFive.panel.collapse.collapse
-        .panel-body
+        .panel-body.small
          |The visualisations show each blockchain grow in realtime. New Bitcoin blocks are added every 10 minutes. Litecoin blocks arrive roughly every 2  minutes and dogecoin roughly every minute. The visualisation shows the latest 100 bitcoin blocks and only the latest 50 for Dogecoin and Litecoin as they appear more often.  Thus the best blockchain to view is Dogecoin as you see new blocks every minute.  
       #break
         p
@@ -225,13 +240,16 @@ html(lang="en")
           loadLiquidFillGauge("fillgauge3", 100.2, config3);    
   #footer.navbar.navbar-default.navbar-fixed-bottom
     .container
-     p.navbar-text
-      | Please Donate to:  
-      img(src="images/Bitcoin.png", style="width:30px;height:30px", align="middle") 
-      |   1BUyAAkBkEQZcqmTcrmRDpw2oR83KZZPcT
-       
-         
-               
+      p.navbar-text
+        | Please Donate to:  
+        img(src="images/Bitcoin.png", style="width:30px;height:30px", align="middle") 
+        |   1BUyAAkBkEQZcqmTcrmRDpw2oR83KZZPcT
+      #dialog(title="Chat")
+        textarea.form-control#chat(rows="10",readonly)
+        //form(action="")
+        input#chatInput(autocomplete="off",style="width:100%;") 
+        //button#chatSend Send
+      button#opener Chat
        
   script(type="text/javascript", src="/javascripts/stopwatch.js")
   script#bits(type='text/javascript', src='/javascripts/d3visual.js')
@@ -282,5 +300,33 @@ html(lang="en")
       //triggerTime (coin);
       //console.log('socket '+coin+' closed');
           
+    });
+
+
+    $( "#dialog" ).dialog({
+      autoOpen: false,
+      show: {
+        effect: "blind",
+        duration: 500
+      },
+      hide: {
+        effect: "explode",
+        duration: 500
+      },
+      width: 'auto'
+    });
+ 
+    $( "#opener" ).click(function() {
+      $( "#dialog" ).dialog( "open" );
+    });
+
+    $("#chatInput").keyup(function(e) {
+      if (e.keyCode == 13){
+        //alert( "Handler for .change() called."+e);
+        var text = $("#chatInput").val();
+        primus.write({op:'chat',text:text});
+        $("#chatInput").val('');
+        return false;
+      }
     });
   });

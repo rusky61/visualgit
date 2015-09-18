@@ -1,23 +1,33 @@
 body{
-  
-    
     background: url("space.jpg");
     -moz-background-size: cover ! important;
     -webkit-background-size: cover !important;
     -o-background-size: cover !important;
     background-size: cover!important;
-   
-   
 }
 	
 .panel > .panel-heading {
 	background-color: #0000a0;
+  padding: 5px;
 }
 
 .panel {
   font-size:17px;
   text-align:justify;
+  border: 0px;
+  margin: 0px;
 }
+
+.form-control{
+ border: 0px; 
+ margin: 0px;
+}
+
+#events-console{
+  padding: 0px;
+  font-size: 10px;
+}
+
 #rightp{
   font-size:15px;
 }
@@ -34,9 +44,8 @@ body{
 }
 
 .newblock{
- top:50%;
- transform: translateY(-50%);
-
+  top:50%;
+  transform: translateY(-50%);
 }
 
 .crypto{

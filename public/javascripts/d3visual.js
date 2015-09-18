@@ -6,7 +6,6 @@ var data = {
 /*
  *Global variables
  */
-var t0 = Date.now();
 var s = 0;
 var t = 1;
 var currentCoin = "btc";
@@ -127,14 +126,16 @@ function updateD3Block(nodes){
 		data.links.push({"source":s++,"target":t++});
     }
     
-    d.link = d.link.data(data.links);
-    d.link.enter().insert("line", "image")   
-    	.attr("class", "link");
-      
-    d.force.linkStrength(function(d,i) {
-    	if (d.target.index == s) return 0.01;
-    	return 1; 
-    });
+    if (data.links.length > 0){
+		d.link = d.link.data(data.links);
+		d.link.enter().insert("line", "image")   
+			.attr("class", "link");
+		  
+		d.force.linkStrength(function(d,i) {
+			if (d.target.index == s) return 0.01;
+			return 1; 
+		});
+    }
 
     d.node = d.node.data(data.nodes);
 
@@ -334,6 +335,24 @@ primus.on("open", function (){
 });
 
 
+function timeNow() {
+  var d = new Date(),
+      h = (d.getHours()<10?'0':'') + d.getHours(),
+      m = (d.getMinutes()<10?'0':'') + d.getMinutes(),
+      s = (d.getSeconds()<10?'0':'') + d.getSeconds();
+  return h + ':' + m + ':'+ s;
+}
+
+/*Write text to event console and scrolls to the end*/
+function writeConsole(text){
+	$('#events-console').append(timeNow()+': '+text+"\n").scrollTop($('#events-console')[0].scrollHeight);
+}
+
+/*Write text to event console and scrolls to the end*/
+function writeToChat(text){
+	$('#chat').append(timeNow()+': '+text+"\n").scrollTop($('#chat')[0].scrollHeight);
+}
+
 //primus.on('welcome', function(msg){
 //console.log(msg);
 //});
@@ -347,6 +366,17 @@ primus.on("data", function incoming(data){
 			latestBlock(firstTableUpdate)
 			triggerTime('btc'); 
 		}
+
+		//rotate coin icon
+	  	$("#"+data.coin+"Icon").rotate({
+    		angle:0,
+    		animateTo:720
+    	});
+	  	
+	  	//write to event console only when the new block arrive
+	  	if (data.fresh === 1){
+    		writeConsole('new '+data.coin.toUpperCase()+' block:' +data.data.height);
+    	}
 		
 	} else if( data.op === 'price'){
 		$.each(data.prices, function( key, value ) {
@@ -361,6 +391,8 @@ primus.on("data", function incoming(data){
 			  });
 		  }
 		});
+	}else if( data.op === 'chat'){
+		writeToChat(data.text);
 	}
 	
 });
