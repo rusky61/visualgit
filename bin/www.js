@@ -191,8 +191,11 @@ function normalizePort(val) {
   return false;
 }
 
+var userNr = 1;
+
 primus.on('connection', function(socket)  {
 	clients.push(socket);
+	socket.chatUserName = 'user_' + userNr++;
 	debug('new connection from %s & concurrent clients number :%d',socket.address.ip, clients.length);
 	socket.on('data', function(msg){
 		debug('message received: %j', msg);
@@ -213,7 +216,7 @@ primus.on('connection', function(socket)  {
 				debug('Client: Unrecognized coin symbol in subscribe');	
 			}
 		}else if (msg.op == "chat"){
-			notifyClientsChat(msg.text);
+			notifyClientsChat(socket.chatUserName+':'+msg.text);
 		}
 		else{
 			debug('Client: Unrecognized message');
@@ -230,7 +233,7 @@ primus.on('end', function () {
 primus.on('disconnection', function (spark) {
 	_.pull(clients,spark);
 	debug('Connection from %j: closed (disconnection)',spark.address);
-	
+	notifyClientsChat('!sys:'+ spark.chatUserName + ' disconnected');
 });
 
 function notifyClientsChat(text){
@@ -238,7 +241,6 @@ function notifyClientsChat(text){
     	socket.write({op:'chat',text:text});
 	});
 }
-
 
 /*Notifies clients about new block, for now we notify all clients even they are subscribe for different coins.
 Clients can use this information to notify user about new block for the other currency*/
@@ -341,6 +343,8 @@ process.on('SIGINT', function () {
 process.on('uncaughtException', function(e) {
 	console.log('Uncaught Exception...');
 	console.log(e.stack);
+	debug('Uncaught Exception...');
+	debug(e.stack);
 	process.exit(99);
 });
 

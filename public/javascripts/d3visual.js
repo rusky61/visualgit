@@ -350,7 +350,7 @@ function writeConsole(text){
 
 /*Write text to event console and scrolls to the end*/
 function writeToChat(text){
-	$('#chat').append(timeNow()+': '+text+"\n").scrollTop($('#chat')[0].scrollHeight);
+	$('#chat').append(timeNow()+':'+text+"\n").scrollTop($('#chat')[0].scrollHeight);
 }
 
 //primus.on('welcome', function(msg){
