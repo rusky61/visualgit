@@ -202,3 +202,12 @@ h1 {
 .sidebar-wrapper{
   margin-bottom: 0px;
 }
+
+.ui-dialog .ui-dialog-content{
+  padding: 0.2em !important;
+}
+
+#chatcontainer {height: 100%; width:100%;}
+#chatleft {width: 75%; height:100%;}
+#chatright {width: 25%; height:100%;}
+

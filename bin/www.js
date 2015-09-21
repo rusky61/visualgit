@@ -193,6 +193,14 @@ function normalizePort(val) {
 
 var userNr = 1;
 
+function getChatUsers(){
+	var chatNames = [];
+	_.forEach(clients, function(client){
+		chatNames.push(client.chatUserName);
+	});
+	return chatNames;
+}
+
 primus.on('connection', function(socket)  {
 	clients.push(socket);
 	socket.chatUserName = 'user_' + userNr++;
@@ -216,13 +224,28 @@ primus.on('connection', function(socket)  {
 				debug('Client: Unrecognized coin symbol in subscribe');	
 			}
 		}else if (msg.op == "chat"){
-			notifyClientsChat(socket.chatUserName+':'+msg.text);
+			var changeChatName = /^!(\w+)\s+(\w+)/;
+			var skipEcho = false;
+			if (typeof msg.text === 'string' ){
+				var r = msg.text.match(changeChatName);
+				//debug("compare command %j",r);
+				if (r != null && r[1] === "nick"){
+					var newNick = (r[2].length > 10) ? r[2].substring(0, 10) : r[2];
+					debug("changing chat name to %s", newNick);
+					notifyChatClientsAboutNickChange(socket.chatUserName,newNick);
+					socket.chatUserName = newNick;
+					skipEcho = true;
+				}
+			}
+			if (!skipEcho) notifyClientsChat(socket.chatUserName+':'+msg.text);
 		}
 		else{
 			debug('Client: Unrecognized message');
 		}
 	});
-	
+	//sent current chat usernames
+	socket.write({op:'chatUsers',data:getChatUsers()});
+	notifyChatClientsAboutNewUser(socket);
 });
 
 
@@ -235,6 +258,20 @@ primus.on('disconnection', function (spark) {
 	debug('Connection from %j: closed (disconnection)',spark.address);
 	notifyClientsChat('!sys:'+ spark.chatUserName + ' disconnected');
 });
+
+function notifyChatClientsAboutNewUser(without){
+	clients.forEach(function(socket) {
+		if (socket != without){
+    		socket.write({op:'chatUsers',data:[without.chatUserName]});
+    	}
+	});
+}
+
+function notifyChatClientsAboutNickChange(from,to){
+	clients.forEach(function(socket) {
+    	socket.write({op:'chatNickChange',from:from,to:to});
+	});
+}
 
 function notifyClientsChat(text){
 	clients.forEach(function(socket) {

@@ -393,10 +393,30 @@ primus.on("data", function incoming(data){
 		});
 	}else if( data.op === 'chat'){
 		writeToChat(data.text);
+	}else if (data.op === 'chatUsers'){
+		addChatUsers(data.data);
+	}else if (data.op === 'chatNickChange'){
+		writeToChat('ccblocks: '+data.from+' changed nick to '+data.to);
+		//change nickname on the list of nicknames
+		$('#chatUsers option').each(function(i){
+			if ($(this).text() === data.from){
+				$(this).text(data.to);
+			}
+		});
 	}
 	
 });
 
+/*add chat users to the chat window*/
+function addChatUsers(arr){
+	var mySelect = $('#chatUsers');
+	$.each(arr, function(val,text) {
+    	mySelect.append(
+        	$('<option></option>').val(val).html(text)
+    	);
+
+	});
+}
 
 
 primus.on('disconnection', function (spark) {
